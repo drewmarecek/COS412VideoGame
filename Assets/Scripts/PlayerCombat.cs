@@ -8,14 +8,14 @@ public class PlayerCombat : MonoBehaviour
     public LayerMask enemyLayers;
 
     public int attackDamage = 1; // Enemy has 2 health, so 2 hits to kill
-    public float attackRate = 2f;
+    public float attackRate = 10f;
     float nextAttackTime = 0f;
 
     void Update()
     {
         if (Time.time >= nextAttackTime)
         {
-            if (Input.GetKeyDown(KeyCode.K) || Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.K))
             {
                 Attack();
                 nextAttackTime = Time.time + 1f / attackRate;

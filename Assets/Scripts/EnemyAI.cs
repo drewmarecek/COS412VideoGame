@@ -2,47 +2,78 @@ using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    public float moveSpeed = 3f;
+    [Header("Movement Stats")]
+    public float speed = 2f;
     public float retreatSpeed = 2f;
-    public float retreatTime = 1.0f; // How long to back up after hitting
+    public float retreatTime = 1.0f; // How long to back up after hitting player
+
+    [Header("Knockback Stats (When Enemy Gets Hit)")]
+    public float knockbackForce = 10f;
+    public float knockbackDuration = 0.2f;
 
     private Transform player;
+    private Rigidbody2D rb;
+    
+    // State Flags
+    private bool isKnockedBack = false;
     private bool isRetreating = false;
-    private float retreatTimer = 0f;
-    private bool isFacingRight = true;
+    
+    // Timers
+    private float knockbackTimer;
+    private float retreatTimer;
 
     void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         GameObject p = GameObject.FindGameObjectWithTag("Player");
         if (p != null) player = p.transform;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (player == null) return;
 
+        // PRIORITY 1: Knockback (Getting hit by player)
+        // This overrides everything else because physics impact is strongest
+        if (isKnockedBack)
+        {
+            knockbackTimer -= Time.deltaTime;
+            if (knockbackTimer <= 0)
+            {
+                isKnockedBack = false;
+                rb.linearVelocity = Vector2.zero; // Stop the slide
+            }
+            return; // Skip normal movement while flying back
+        }
+
+        // PRIORITY 2: Retreating (After hitting player)
         if (isRetreating)
         {
-            // Move AWAY from player
-            transform.position = Vector2.MoveTowards(transform.position, player.position, -retreatSpeed * Time.deltaTime);
-            
             retreatTimer -= Time.deltaTime;
+            
+            // Move AWAY from player
+            Vector2 direction = (transform.position - player.position).normalized;
+            rb.linearVelocity = direction * retreatSpeed;
+
             if (retreatTimer <= 0)
             {
-                isRetreating = false;
+                isRetreating = false; // Time to attack again!
             }
         }
+        // PRIORITY 3: Chasing (Normal State)
         else
         {
             // Move TOWARDS player
-            transform.position = Vector2.MoveTowards(transform.position, player.position, moveSpeed * Time.deltaTime);
+            Vector2 direction = (player.position - transform.position).normalized;
+            rb.linearVelocity = direction * speed;
         }
 
-        // Face the player (visuals)
-        if (transform.position.x < player.position.x && !isFacingRight) Flip();
-        else if (transform.position.x > player.position.x && isFacingRight) Flip();
+        // Handle Facing Direction
+        if (player.position.x > transform.position.x && transform.localScale.x < 0) Flip();
+        else if (player.position.x < transform.position.x && transform.localScale.x > 0) Flip();
     }
 
+    // Triggers when Enemy touches Player
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
@@ -50,13 +81,23 @@ public class EnemyAI : MonoBehaviour
             PlayerHealth health = collision.gameObject.GetComponent<PlayerHealth>();
             if (health != null)
             {
-                // Change this from 2 to 1
-                health.TakeDamage(1); 
+                health.TakeDamage(1); // Deal damage
+                StartRetreat();       // Back off!
             }
-
-            // Ensure this function is called so the enemy bounces back!
-            StartRetreat();
         }
+    }
+
+    // Called by EnemyHealth script when player hits US
+    public void ApplyKnockback()
+    {
+        isKnockedBack = true;
+        isRetreating = false; // Knockback cancels retreat
+        knockbackTimer = knockbackDuration;
+
+        // Push enemy away from player using physics impulse
+        Vector2 direction = (transform.position - player.position).normalized;
+        rb.linearVelocity = Vector2.zero;
+        rb.AddForce(direction * knockbackForce, ForceMode2D.Impulse);
     }
 
     void StartRetreat()
@@ -67,9 +108,8 @@ public class EnemyAI : MonoBehaviour
 
     void Flip()
     {
-        isFacingRight = !isFacingRight;
-        Vector3 s = transform.localScale;
-        s.x *= -1;
-        transform.localScale = s;
+        Vector3 scale = transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
     }
 }

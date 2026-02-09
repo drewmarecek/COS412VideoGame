@@ -2,21 +2,32 @@ using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
-    public int maxHealth = 2;
-    int currentHealth;
+    public int maxHealth = 3;
+    private int currentHealth;
+
+    // We need the AI script to tell it to stop moving when hit
+    private EnemyAI enemyAI;
 
     void Start()
     {
         currentHealth = maxHealth;
+        enemyAI = GetComponent<EnemyAI>();
     }
 
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
 
-        // Play hurt animation/sound here
-        Debug.Log("Enemy Hit!");
+        // 1. Play Hurt Animation (Optional)
+        // GetComponent<Animator>().SetTrigger("Hit");
 
+        // 2. Apply Knockback (We will add this function to EnemyAI next)
+        if (enemyAI != null)
+        {
+            enemyAI.ApplyKnockback();
+        }
+
+        // 3. Check for Death
         if (currentHealth <= 0)
         {
             Die();
@@ -25,8 +36,8 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("Enemy Died!");
-        // Disable enemy or play death animation
-        Destroy(gameObject); 
+        // Disable the enemy so it stops moving/attacking
+        // (You can also play a death anim here before destroying)
+        Destroy(gameObject);
     }
 }

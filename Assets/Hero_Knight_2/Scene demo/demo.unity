@@ -4488,8 +4488,8 @@ GameObject:
   - component: {fileID: 344080214}
   - component: {fileID: 344080213}
   - component: {fileID: 344080212}
-  - component: {fileID: 344080211}
   - component: {fileID: 344080216}
+  - component: {fileID: 344080217}
   m_Layer: 8
   m_Name: golem
   m_TagString: Enemy
@@ -4506,58 +4506,12 @@ Transform:
   m_GameObject: {fileID: 344080209}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.07, y: -0.31, z: 0}
+  m_LocalPosition: {x: 1.07, y: -0.369, z: 0}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 383071283}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &344080211
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 344080209}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0.0047920346, y: -0.025794722}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.64, y: 0.64}
-    newSize: {x: 0.64, y: 0.64}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.29500687, y: 0.2318859}
-  m_EdgeRadius: 0
 --- !u!50 &344080212
 Rigidbody2D:
   serializedVersion: 5
@@ -4584,7 +4538,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &344080213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4609,7 +4563,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d9c3645b35414d62905415d850b9248, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 2
+  maxHealth: 4
 --- !u!212 &344080215
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4680,9 +4634,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3410f282b59814137b370d3ac50cfac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  moveSpeed: 0.5
-  retreatSpeed: 0.2
-  retreatTime: 1
+  speed: 0.5
+  retreatSpeed: 0.4
+  retreatTime: 0.5
+  knockbackForce: 2
+  knockbackDuration: 0.3
+--- !u!70 &344080217
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 344080209}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.0018103521, y: -0.028225979}
+  m_Size: {x: 0.28453678, y: 0.28453678}
+  m_Direction: 0
 --- !u!1 &346939789
 GameObject:
   m_ObjectHideFlags: 0
@@ -21069,6 +21062,7 @@ MonoBehaviour:
   - {fileID: 2016862259}
   - {fileID: 1378664595}
   - {fileID: 1953052832}
+  iFrameDuration: 0.5
 --- !u!114 &1389458497
 MonoBehaviour:
   m_ObjectHideFlags: 0
