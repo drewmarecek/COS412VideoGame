@@ -5,7 +5,7 @@ public class CameraFollow : MonoBehaviour
     public Transform player;
 
     // Set this to the Y-position where you want the camera to sit by default
-    public float baselineHeight = 0f;
+    public float baselineHeight = 0.7f;
 
     // 1. Define the step size here (1.5 units)
     public float stepSize = 1.5f;
