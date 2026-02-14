@@ -2,21 +2,23 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public int damage = 10;
-    public GameObject hitEffect; // Optional: Explosion particle
+    public int damageAmount = 1;
 
-    void OnTriggerEnter2D(Collider2D hitInfo)
+    void OnTriggerEnter2D(Collider2D other)
     {
-        if (hitInfo.CompareTag("Player")) return;
+        // Look for the EnemyHealth script on whatever we hit
+        EnemyHealth enemy = other.GetComponent<EnemyHealth>();
 
-        // Change "Enemy" to "EnemyHealth" to match your script name
-        EnemyHealth enemy = hitInfo.GetComponent<EnemyHealth>();
-        
         if (enemy != null)
         {
-            enemy.TakeDamage(1); // Deals 1 damage per bullet
+            enemy.TakeDamage(damageAmount);
+            Debug.Log("Hit Enemy!");
         }
 
-        Destroy(gameObject);
+        // Destroy the bullet so it doesn't fly forever
+        if (!other.CompareTag("Player")) // Don't destroy if hitting player
+        {
+            Destroy(gameObject);
+        }
     }
 }

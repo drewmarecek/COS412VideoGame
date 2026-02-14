@@ -18,11 +18,33 @@ public class WeaponManager : MonoBehaviour
 
     void Update()
     {
+
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        // If mouse is to the left and player is facing right
+        if (mousePos.x < transform.position.x && transform.localScale.x > 0)
+        {
+            Flip();
+        }
+        // If mouse is to the right and player is facing left
+        else if (mousePos.x > transform.position.x && transform.localScale.x < 0)
+        {
+            Flip();
+        }
+
         // Toggle weapons with Q, BUT only if we have picked up the gun
         if (Input.GetKeyDown(KeyCode.Q) && hasGun)
         {
             ToggleWeapon();
         }
+    }
+
+    void Flip()
+    {
+        // Multiply the player's x local scale by -1.
+        Vector3 currentScale = transform.localScale;
+        currentScale.x *= -1;
+        transform.localScale = currentScale;
     }
 
     void ToggleWeapon()
