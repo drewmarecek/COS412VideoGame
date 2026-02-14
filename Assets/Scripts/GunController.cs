@@ -8,6 +8,7 @@ public class GunController : MonoBehaviour
 
     void Update()
     {
+        if (!gameObject.activeInHierarchy) return;
         AimAtMouse();
 
         if (Input.GetMouseButtonDown(0))

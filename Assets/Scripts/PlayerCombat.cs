@@ -2,43 +2,62 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
-    public Animator animator;
     public Transform attackPoint;
     public float attackRange = 0.5f;
     public LayerMask enemyLayers;
 
-    public int attackDamage = 1; // Enemy has 2 health, so 2 hits to kill
-    public float attackRate = 10f;
+    public int attackDamage = 1; 
+    public float attackRate = 10f; // Attacks per second
     float nextAttackTime = 0f;
+
+    private WeaponManager weaponManager;
+    private Animator anim;
+
+    void Start()
+    {
+        weaponManager = GetComponent<WeaponManager>();
+        anim = GetComponent<Animator>();
+    }
 
     void Update()
     {
+        // Check for cooldown timer
         if (Time.time >= nextAttackTime)
         {
-            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.K))
+            if (Input.GetMouseButtonDown(0))
             {
-                Attack();
-                nextAttackTime = Time.time + 1f / attackRate;
+                // Only swing if the gun is NOT active
+                if (weaponManager.gunObject != null && !weaponManager.gunObject.activeSelf)
+                {
+                    SwingSword();
+                    // Set cooldown
+                    nextAttackTime = Time.time + 1f / attackRate;
+                }
             }
         }
     }
 
-    void Attack()
+    void SwingSword()
     {
-        // Play an animation
-        if (animator != null) animator.SetTrigger("Attack");
+        // 1. Play animation
+        anim.SetTrigger("Attack");
 
-        // Detect enemies in range of attack
+        // 2. Detect enemies in range of attack
+        // This creates an invisible circle at your attack point
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
 
-        // Damage them
+        // 3. Damage them
         foreach (Collider2D enemy in hitEnemies)
         {
-            enemy.GetComponent<EnemyHealth>().TakeDamage(attackDamage);
+            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
+            {
+                enemyHealth.TakeDamage(attackDamage);
+            }
         }
     }
 
-    // See the range in the editor
+    // This helps you see the attack circle in the Unity Editor
     void OnDrawGizmosSelected()
     {
         if (attackPoint == null) return;
