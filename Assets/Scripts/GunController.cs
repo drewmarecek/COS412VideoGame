@@ -6,13 +6,19 @@ public class GunController : MonoBehaviour
     public Transform firePoint;
     public float bulletForce = 20f;
 
+    [Header("Firing Settings")]
+    public float fireRate = 3f; // Shots per second
+    private float nextTimeToFire = 0f;
+
     void Update()
     {
         if (!gameObject.activeInHierarchy) return;
         AimAtMouse();
 
-        if (Input.GetMouseButtonDown(0))
+        // Changed to GetMouseButton (for holding) + fireRate check
+        if (Input.GetMouseButton(0) && Time.time >= nextTimeToFire)
         {
+            nextTimeToFire = Time.time + 1f / fireRate;
             Shoot();
         }
     }
@@ -26,31 +32,34 @@ public class GunController : MonoBehaviour
         // Use transform.rotation (World Space) to ignore parent rotation
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-        // FIX THE DOUBLE FLIP:
-        // We check if the player's scale is negative. 
-        // If player is flipped (-1), the gun needs to flip its Y to stay upright.
+        // YOUR ORIGINAL FLIP LOGIC
         bool playerIsFlipped = transform.root.localScale.x < 0;
 
         if (playerIsFlipped)
         {
-            // If player is facing Left, the gun's "up" is actually "down"
-            // We flip the Y to compensate for the parent's -1 Scale X
+            // Keeping your specific scale values: -0.2f, -0.2f, 0.2f
             transform.localScale = new Vector3(-0.2f, -0.2f, 0.2f); 
         }
         else
         {
-            // If player is facing Right, keep gun scale normal
+            // Keeping your specific scale values: 0.2f, 0.2f, 0.2f
             transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
         }
     }
 
     void Shoot()
     {
+        // Added a quick null check just in case the prefab is missing
+        if (bulletPrefab == null) return;
+
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        
+        // Ensure bullet cleans itself up after 3 seconds
+        Destroy(bullet, 3f);
+
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            // Use transform.right so it always shoots where the barrel is pointing
             rb.linearVelocity = transform.right * bulletForce;
         }
     }
