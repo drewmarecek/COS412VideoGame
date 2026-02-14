@@ -4,21 +4,24 @@ public class Bullet : MonoBehaviour
 {
     public int damageAmount = 1;
 
+    void Start()
+    {
+        // This tells Unity: "Wait 3 seconds, then delete this object."
+        Destroy(gameObject, 3f);
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Look for the EnemyHealth script on whatever we hit
         EnemyHealth enemy = other.GetComponent<EnemyHealth>();
 
         if (enemy != null)
         {
             enemy.TakeDamage(damageAmount);
-            Debug.Log("Hit Enemy!");
+            Destroy(gameObject); // Destroy immediately on hit
         }
-
-        // Destroy the bullet so it doesn't fly forever
-        if (!other.CompareTag("Player")) // Don't destroy if hitting player
+        else if (!other.CompareTag("Player"))
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // Destroy if it hits a wall/floor
         }
     }
 }
