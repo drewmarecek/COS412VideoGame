@@ -5,6 +5,7 @@ public class PlayerCombat : MonoBehaviour
     public Transform attackPoint;
     public float attackRange = 0.5f;
     public LayerMask enemyLayers;
+    public HitStop hitStop;
 
     public int attackDamage = 1; 
     public float attackRate = 10f; // Attacks per second
@@ -53,6 +54,7 @@ public class PlayerCombat : MonoBehaviour
             if (enemyHealth != null)
             {
                 enemyHealth.TakeDamage(attackDamage);
+                hitStop.Stop(0.09f, 60);
             }
         }
     }
