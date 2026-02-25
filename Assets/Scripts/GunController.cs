@@ -38,12 +38,12 @@ public class GunController : MonoBehaviour
         if (playerIsFlipped)
         {
             // Keeping your specific scale values: -0.2f, -0.2f, 0.2f
-            transform.localScale = new Vector3(-0.2f, -0.2f, 0.2f); 
+            transform.localScale = new Vector3(-0.15f, -0.15f, 0.15f); 
         }
         else
         {
             // Keeping your specific scale values: 0.2f, 0.2f, 0.2f
-            transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            transform.localScale = new Vector3(0.15f, 0.15f, 0.15f);
         }
     }
 
