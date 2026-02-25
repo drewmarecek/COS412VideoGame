@@ -21,4 +21,3 @@ enemies that jump up from the ground
 enemies that throw boomerangs
 some kind of unique movement mechanic
 jump pads
-
