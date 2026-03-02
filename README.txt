@@ -4,19 +4,23 @@ Fix movement bug (done)
 Fix camera movement so it doens't follow the player so closely when they jump (done)
 Bullet despawn (done)
 Add a shake or pause whenever somebody is hit or just for headshots (done)
+Swinging scythes from the ceiling (done)
 
 Add for next class:
 more land
-attack/death effects
+Make the game close corridors
+think about adding a boss
+
+attack/death effects (optional)
 
 To add soon:
 press down to dash
 Rapid fire with gun, hold to shoot
 make the sword longer
-Make the levels close corridors
+yoshi
+make it so you can't go left off the start
 
 To add in the future:
-Swinging scythes from the ceiling
 Flying enemies (ghouls)
 bosses
 Falling inanimate saws
