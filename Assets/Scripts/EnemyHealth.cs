@@ -36,7 +36,8 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        FindObjectOfType<HitStop>().Stop(0.3f, 20);
+        HitStop hitStop = FindFirstObjectByType<HitStop>();
+        if (hitStop != null) hitStop.Stop(0.3f, 20);
         // Disable the enemy so it stops moving/attacking
         // (You can also play a death anim here before destroying)
         Destroy(gameObject);
