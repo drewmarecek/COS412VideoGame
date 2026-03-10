@@ -20,6 +20,7 @@ work on combat
 **To add soon:**
 ---------------------------------------------------------------
 press down to dash
+music/sound effects
 Rapid fire with gun, hold to shoot
 make the sword longer
 yoshi
@@ -34,6 +35,6 @@ enemies that jump up from the ground
 enemies that throw boomerangs
 some kind of unique movement mechanic
 jump pads
-
+wall jumping
 
 
