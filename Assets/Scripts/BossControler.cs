@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class BossController : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class BossController : MonoBehaviour
 
     [Header("References")]
     public GameObject gunPickupPrefab;
+    [Tooltip("How long the death animation plays before the boss disappears")]
+    public float deathDisappearDelay = 1.5f;
     public Transform attackPoint; // Create an empty child on the boss's hand and drag it here
     public float attackRadius = 1.5f;
     public LayerMask playerLayer;
@@ -84,7 +87,7 @@ public class BossController : MonoBehaviour
 
     public void ResetAttack() { isAttacking = false; }
 
-    // Contact damage - player takes damage when touching the boss (no attack animation needed)
+    // Contact damage - player takes damage when touching the boss
     private void OnCollisionEnter2D(Collision2D collision) {
         TryDamagePlayer(collision.gameObject);
     }
@@ -122,8 +125,36 @@ public class BossController : MonoBehaviour
             Debug.LogWarning("BossController: gunPickupPrefab is not assigned! Assign it in the Inspector for the gun to appear.");
         }
 
-        rb.simulated = false; 
-        this.enabled = false;
+        rb.simulated = false;
+        foreach (Collider2D col in GetComponentsInChildren<Collider2D>()) {
+            col.enabled = false;
+        }
+
+        StartCoroutine(FadeOutAndDestroy());
+    }
+
+    IEnumerator FadeOutAndDestroy() {
+        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
+        Color[] originalColors = new Color[sprites.Length];
+        for (int i = 0; i < sprites.Length; i++) {
+            originalColors[i] = sprites[i].color;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < deathDisappearDelay) {
+            elapsed += Time.deltaTime;
+            float alpha = 1f - (elapsed / deathDisappearDelay);
+            for (int i = 0; i < sprites.Length; i++) {
+                if (sprites[i] != null) {
+                    Color c = originalColors[i];
+                    c.a = originalColors[i].a * alpha;
+                    sprites[i].color = c;
+                }
+            }
+            yield return null;
+        }
+
+        Destroy(gameObject);
     }
 
     // Visualizes the hitbox in the editor
