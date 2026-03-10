@@ -38,6 +38,8 @@ enemies that throw boomerangs
 some kind of unique movement mechanic
 jump pads
 wall jumping
+lock player in room with enemies that they need to defeat before they move on
+
 
 
 
