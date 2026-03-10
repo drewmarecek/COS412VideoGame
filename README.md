@@ -25,6 +25,8 @@ Rapid fire with gun, hold to shoot
 make the sword longer
 yoshi
 make it so you can't go left off the start
+Use AI to improve the visuals **
+
 
 **To add in the future:**
 ---------------------------------------------------------------
@@ -36,5 +38,6 @@ enemies that throw boomerangs
 some kind of unique movement mechanic
 jump pads
 wall jumping
+
 
 
