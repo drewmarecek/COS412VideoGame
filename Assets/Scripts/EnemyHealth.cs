@@ -17,12 +17,18 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // Skeleton handles its own health, knockback, and death (like the boss)
+        if (skeletonAI != null)
+        {
+            skeletonAI.TakeDamage(damage);
+            return;
+        }
+
+        // Original blob enemy path
         currentHealth -= damage;
 
         if (enemyAI != null)
             enemyAI.ApplyKnockback();
-        else if (skeletonAI != null)
-            skeletonAI.ApplyKnockback();
 
         if (currentHealth <= 0)
         {
@@ -38,14 +44,6 @@ public class EnemyHealth : MonoBehaviour
     {
         HitStop hitStop = FindFirstObjectByType<HitStop>();
         if (hitStop != null) hitStop.Stop(0.2f, 12);
-
-        if (skeletonAI != null)
-        {
-            skeletonAI.Die();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
 }
