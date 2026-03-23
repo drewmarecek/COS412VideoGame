@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -8,11 +9,16 @@ public class PlayerHealth : MonoBehaviour
     public int maxHealth = 3;
 
     [Header("UI References")]
-    public GameObject[] hearts; 
+    public GameObject[] hearts;
 
     [Header("Invincibility")]
     public float iFrameDuration = 0.5f;
     private float iFrameTimer;
+    public bool IsInvincible => iFrameTimer > 0;
+
+    [Header("Death")]
+    [Tooltip("Pause before respawning when the player dies")]
+    public float respawnDelay = 0.4f;
 
     private Vector3 currentRespawnPoint;
     private Rigidbody2D rb;
@@ -61,7 +67,7 @@ public class PlayerHealth : MonoBehaviour
         // 5. Check for death
         if (health <= 0)
         {
-            Respawn();
+            StartCoroutine(RespawnAfterDelay());
         }
     }
 
@@ -82,21 +88,51 @@ public class PlayerHealth : MonoBehaviour
 
     public void Respawn()
     {
+        RespawnImmediate();
+    }
+
+    /// <summary>Call when the player dies (e.g. fell in KillZone) to respawn after a pause.</summary>
+    public void RespawnWithDelay()
+    {
+        health = 0;
+        UpdateUI();
+        StartCoroutine(RespawnAfterDelay());
+    }
+
+    IEnumerator RespawnAfterDelay()
+    {
+        // Disable physics so the player doesn't fall or get hit during the pause
+        if (rb != null) rb.simulated = false;
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        yield return new WaitForSeconds(respawnDelay);
+
+        if (col != null) col.enabled = true;
+        if (rb != null) rb.simulated = true;
+        RespawnImmediate();
+    }
+
+    void RespawnImmediate()
+    {
         // 1. Move the player
         transform.position = currentRespawnPoint;
 
         // 2. Stop any falling/sliding movement
         if (rb != null)
         {
+            rb.simulated = true;
             rb.linearVelocity = Vector2.zero;
         }
 
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = true;
+
         // 3. Refill health to max
         health = maxHealth;
-        
-        // 4. THE FIX: Give the player 1 full second of invincibility on respawn
-        // This prevents the enemy from hitting you before you can move!
-        iFrameTimer = 1.0f; 
+
+        // 4. Give the player 1 full second of invincibility on respawn
+        iFrameTimer = 1.0f;
 
         UpdateUI();
         Debug.Log("Player Respawned with full health and grace period.");

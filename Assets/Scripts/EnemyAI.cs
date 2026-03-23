@@ -7,6 +7,10 @@ public class EnemyAI : MonoBehaviour
     public float retreatSpeed = 2f;
     public float retreatTime = 1.0f; // How long to back up after hitting player
 
+    [Header("Detection")]
+    [Tooltip("How close the player must be for the enemy to attack")]
+    public float detectionRange = 4f;
+
     [Header("Knockback Stats (When Enemy Gets Hit)")]
     public float knockbackForce = 10f;
     public float knockbackDuration = 0.2f;
@@ -50,22 +54,34 @@ public class EnemyAI : MonoBehaviour
         if (isRetreating)
         {
             retreatTimer -= Time.deltaTime;
-            
-            // Move AWAY from player
-            Vector2 direction = (transform.position - player.position).normalized;
-            rb.linearVelocity = direction * retreatSpeed;
+
+            // Move AWAY from player (horizontal only - allow falling but not flying)
+            float dirX = Mathf.Sign(transform.position.x - player.position.x);
+            float vy = Mathf.Min(0f, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(dirX * retreatSpeed, vy);
 
             if (retreatTimer <= 0)
             {
                 isRetreating = false; // Time to attack again!
             }
         }
-        // PRIORITY 3: Chasing (Normal State)
+        // PRIORITY 3: Chasing (only when player is close enough, horizontal only)
         else
         {
-            // Move TOWARDS player
-            Vector2 direction = (player.position - transform.position).normalized;
-            rb.linearVelocity = direction * speed;
+            float distance = Vector2.Distance(transform.position, player.position);
+            if (distance <= detectionRange)
+            {
+                // Move TOWARDS player (horizontal only - allow falling but not flying)
+                float dirX = Mathf.Sign(player.position.x - transform.position.x);
+                float vy = Mathf.Min(0f, rb.linearVelocity.y);
+                rb.linearVelocity = new Vector2(dirX * speed, vy);
+            }
+            else
+            {
+                // Player too far - stay idle (allow falling)
+                float vy = Mathf.Min(0f, rb.linearVelocity.y);
+                rb.linearVelocity = new Vector2(0f, vy);
+            }
         }
 
         // Handle Facing Direction
@@ -94,10 +110,10 @@ public class EnemyAI : MonoBehaviour
         isRetreating = false; // Knockback cancels retreat
         knockbackTimer = knockbackDuration;
 
-        // Push enemy away from player using physics impulse
-        Vector2 direction = (transform.position - player.position).normalized;
+        // Push enemy away from player (horizontal only - no flying)
+        float dirX = Mathf.Sign(transform.position.x - player.position.x);
         rb.linearVelocity = Vector2.zero;
-        rb.AddForce(direction * knockbackForce, ForceMode2D.Impulse);
+        rb.AddForce(new Vector2(dirX * knockbackForce, 0f), ForceMode2D.Impulse);
     }
 
     void StartRetreat()

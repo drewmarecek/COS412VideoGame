@@ -10,6 +10,8 @@ public class CameraFollow : MonoBehaviour
     // 1. Define the step size here (1.5 units)
     public float stepSize = 1.5f;
 
+    private CameraShake cameraShake;
+
     void Start()
     {
         if (player == null)
@@ -25,6 +27,8 @@ public class CameraFollow : MonoBehaviour
                 Debug.LogError("CAMERA ERROR: Could not find an object tagged 'Player'!");
             }
         }
+
+        cameraShake = GetComponent<CameraShake>();
     }
 
     void LateUpdate()
@@ -49,7 +53,9 @@ public class CameraFollow : MonoBehaviour
         //    Example: If steps = 2, targetY becomes 3.0.
         float targetY = baselineHeight + (steps * stepSize);
 
-        // Apply position immediately.
-        transform.position = new Vector3(targetX, targetY, -10f);
+        // Apply position with screen shake
+        Vector3 basePos = new Vector3(targetX, targetY, -10f);
+        Vector3 shakeOffset = cameraShake != null ? cameraShake.GetShakeOffset() : Vector3.zero;
+        transform.position = basePos + shakeOffset;
     }
 }

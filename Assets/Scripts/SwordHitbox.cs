@@ -8,19 +8,32 @@ public class SwordHitbox : MonoBehaviour
     {
         if (other.CompareTag("Enemy"))
         {
+            bool didHit = false;
+
             // 1. Try to damage the Boss first
             BossController boss = other.GetComponent<BossController>();
             if (boss != null)
             {
                 boss.TakeDamage(damage);
-                return; // Exit if we hit the boss so we don't double-damage
+                didHit = true;
+            }
+            else
+            {
+                // 2. If it's not a boss, try the regular EnemyHealth script
+                EnemyHealth eHealth = other.GetComponent<EnemyHealth>();
+                if (eHealth != null)
+                {
+                    eHealth.TakeDamage(damage);
+                    didHit = true;
+                }
             }
 
-            // 2. If it's not a boss, try the regular EnemyHealth script
-            EnemyHealth eHealth = other.GetComponent<EnemyHealth>();
-            if (eHealth != null)
+            if (didHit)
             {
-                eHealth.TakeDamage(damage);
+                CameraShake camShake = FindFirstObjectByType<CameraShake>();
+                if (camShake != null) camShake.ShakeHit();
+                HitStop hitStop = FindFirstObjectByType<HitStop>();
+                if (hitStop != null) hitStop.Stop(0.07f, 45);
             }
         }
     }

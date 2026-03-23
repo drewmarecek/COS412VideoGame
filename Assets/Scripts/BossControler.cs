@@ -12,6 +12,9 @@ public class BossController : MonoBehaviour
     public float nextAttackTime;
 
     [Header("References")]
+    [Tooltip("Treasure chest that drops when boss dies. Assign a prefab with TreasureChest script + chest sprite/animator.")]
+    public GameObject treasureChestPrefab;
+    [Tooltip("Gun pickup that appears when the chest opens. Assign the same prefab you used before.")]
     public GameObject gunPickupPrefab;
     [Tooltip("How long the death animation plays before the boss disappears")]
     public float deathDisappearDelay = 1.5f;
@@ -80,6 +83,7 @@ public class BossController : MonoBehaviour
         if (hitPlayer != null) {
             PlayerHealth playerHealth = hitPlayer.GetComponent<PlayerHealth>();
             if (playerHealth != null) {
+                TriggerPlayerHitEffects(playerHealth, damageValue);
                 playerHealth.TakeDamage(damageValue);
             }
         }
@@ -101,8 +105,24 @@ public class BossController : MonoBehaviour
         if (other.CompareTag("Player")) {
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null) {
+                TriggerPlayerHitEffects(playerHealth, damageValue);
                 playerHealth.TakeDamage(damageValue);
             }
+        }
+    }
+
+    void TriggerPlayerHitEffects(PlayerHealth playerHealth, int damage) {
+        if (playerHealth.IsInvincible) return;
+        bool willDie = playerHealth.health <= damage;
+        CameraShake camShake = FindFirstObjectByType<CameraShake>();
+        if (camShake != null) {
+            if (willDie) camShake.ShakeKill();
+            else camShake.ShakeHit();
+        }
+        HitStop hitStop = FindFirstObjectByType<HitStop>();
+        if (hitStop != null) {
+            if (willDie) hitStop.Stop(0.25f, 15);
+            else hitStop.Stop(0.07f, 45);
         }
     }
 
@@ -116,13 +136,17 @@ public class BossController : MonoBehaviour
     void Die() {
         isDead = true;
         anim.SetTrigger("Death");
-        
-        // Spawn gun where the boss died (slightly above so it's visible)
-        if (gunPickupPrefab != null) {
-            Vector3 spawnPos = transform.position + Vector3.up * 0.5f;
-            Instantiate(gunPickupPrefab, spawnPos, Quaternion.identity);
+
+        // Spawn treasure chest where the boss died (it will fall with gravity)
+        if (treasureChestPrefab != null) {
+            Vector3 spawnPos = transform.position;
+            GameObject chest = Instantiate(treasureChestPrefab, spawnPos, Quaternion.identity);
+            TreasureChest tc = chest.GetComponent<TreasureChest>();
+            if (tc != null && gunPickupPrefab != null) {
+                tc.gunPickupPrefab = gunPickupPrefab;
+            }
         } else {
-            Debug.LogWarning("BossController: gunPickupPrefab is not assigned! Assign it in the Inspector for the gun to appear.");
+            Debug.LogWarning("BossController: treasureChestPrefab is not assigned! Assign it in the Inspector for the chest to drop.");
         }
 
         rb.simulated = false;

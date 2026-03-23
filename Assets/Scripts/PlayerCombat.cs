@@ -54,7 +54,9 @@ public class PlayerCombat : MonoBehaviour
             if (enemyHealth != null)
             {
                 enemyHealth.TakeDamage(attackDamage);
-                hitStop.Stop(0.09f, 60);
+                CameraShake camShake = FindFirstObjectByType<CameraShake>();
+                if (camShake != null) camShake.ShakeHit();
+                if (hitStop != null) hitStop.Stop(0.07f, 45);
             }
         }
     }

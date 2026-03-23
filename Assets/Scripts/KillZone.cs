@@ -10,8 +10,7 @@ public class KillZone : MonoBehaviour
             PlayerHealth health = other.GetComponent<PlayerHealth>();
             if (health != null)
             {
-                // In The Glitch Protocol, falling into the void is an instant respawn!
-                health.Respawn(); 
+                health.RespawnWithDelay(); 
             }
         }
     }

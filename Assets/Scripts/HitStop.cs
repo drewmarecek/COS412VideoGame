@@ -16,7 +16,7 @@ public class HitStop : MonoBehaviour
         isWaiting = true;
 
         // 1. Wait for a specific number of frames
-        // This allows the animation/knockback to move slightly before the freeze
+        // This allows the animation/knockback to move slightly before the freeze (more intentional timing)
         for (int i = 0; i < delayFrames; i++)
         {
             yield return null;

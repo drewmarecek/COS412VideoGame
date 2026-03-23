@@ -23,6 +23,8 @@ public class Bullet : MonoBehaviour
         if (enemy != null)
         {
             enemy.TakeDamage(damageAmount);
+            HitStop hitStop = FindFirstObjectByType<HitStop>();
+            if (hitStop != null) hitStop.Stop(0.035f, 20);
             Destroy(gameObject); // Hit enemy, destroy bullet
             return;
         }
