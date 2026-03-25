@@ -53,10 +53,6 @@ public class GunController : MonoBehaviour
         if (bulletPrefab == null) return;
 
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        
-        // Ensure bullet cleans itself up after 3 seconds
-        Destroy(bullet, 3f);
-
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         if (rb != null)
         {

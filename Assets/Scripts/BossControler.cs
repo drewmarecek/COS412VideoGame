@@ -14,8 +14,6 @@ public class BossController : MonoBehaviour
     [Header("References")]
     [Tooltip("Treasure chest that drops when boss dies. Assign a prefab with TreasureChest script + chest sprite/animator.")]
     public GameObject treasureChestPrefab;
-    [Tooltip("Gun pickup that appears when the chest opens. Assign the same prefab you used before.")]
-    public GameObject gunPickupPrefab;
     [Tooltip("How long the death animation plays before the boss disappears")]
     public float deathDisappearDelay = 1.5f;
     public Transform attackPoint; // Create an empty child on the boss's hand and drag it here
@@ -139,12 +137,7 @@ public class BossController : MonoBehaviour
 
         // Spawn treasure chest where the boss died (it will fall with gravity)
         if (treasureChestPrefab != null) {
-            Vector3 spawnPos = transform.position;
-            GameObject chest = Instantiate(treasureChestPrefab, spawnPos, Quaternion.identity);
-            TreasureChest tc = chest.GetComponent<TreasureChest>();
-            if (tc != null && gunPickupPrefab != null) {
-                tc.gunPickupPrefab = gunPickupPrefab;
-            }
+            Instantiate(treasureChestPrefab, transform.position, Quaternion.identity);
         } else {
             Debug.LogWarning("BossController: treasureChestPrefab is not assigned! Assign it in the Inspector for the chest to drop.");
         }

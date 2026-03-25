@@ -8,9 +8,6 @@ public class TreasureChest : MonoBehaviour
     [Tooltip("Animator bool name for opening (default: Open)")]
     public string openTriggerName = "Open";
 
-    // Not used anymore but kept so the BossController inspector reference doesn't break
-    [HideInInspector] public GameObject gunPickupPrefab;
-
     private Animator anim;
     private Collider2D col;
     private bool isOpened;

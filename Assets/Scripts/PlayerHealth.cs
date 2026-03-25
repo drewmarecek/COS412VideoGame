@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
@@ -84,11 +83,6 @@ public class PlayerHealth : MonoBehaviour
     public void SetNewRespawnPoint(Vector3 newPosition)
     {
         currentRespawnPoint = newPosition;
-    }
-
-    public void Respawn()
-    {
-        RespawnImmediate();
     }
 
     /// <summary>Call when the player dies (e.g. fell in KillZone) to respawn after a pause.</summary>

@@ -4,18 +4,28 @@ public class CameraFollow : MonoBehaviour
 {
     public Transform player;
 
-    [Header("Vertical")]
-    [Tooltip("The default camera Y position when the player is on the ground")]
-    public float baselineHeight = 0.7f;
-    [Tooltip("How far above the camera center the player can go before the camera follows them up")]
-    public float verticalOffset = 1.5f;
+    [Header("Spawn Offset")]
+    [Tooltip("How far above the player the camera starts at spawn. Only affects the initial position.")]
+    public float spawnOffset = 1.0f;
+
+    [Header("Deadzone (player can move freely inside this box without the camera moving)")]
+    [Tooltip("Half-width of the deadzone box. Player must push past this horizontally to move the camera.")]
+    public float deadzoneX = 0.5f;
+    [Tooltip("Half-height of the deadzone box. Player must push past this vertically to move the camera.")]
+    public float deadzoneY = 1.0f;
 
     [Header("Smoothing")]
-    [Tooltip("How quickly the camera catches up vertically (lower = smoother)")]
-    public float verticalSmoothTime = 0.25f;
+    [Tooltip("How quickly the camera catches up horizontally")]
+    public float horizontalSmoothTime = 0.1f;
+    [Tooltip("How quickly the camera catches up vertically")]
+    public float verticalSmoothTime = 0.2f;
 
     private CameraShake cameraShake;
+    private float targetX;
+    private float targetY;
+    private float currentX;
     private float currentY;
+    private float velocityX;
     private float velocityY;
 
     void Start()
@@ -30,23 +40,45 @@ public class CameraFollow : MonoBehaviour
         cameraShake = GetComponent<CameraShake>();
 
         if (player != null)
-            currentY = baselineHeight;
+        {
+            targetX = player.position.x;
+            targetY = player.position.y + spawnOffset;
+            currentX = targetX;
+            currentY = targetY;
+        }
     }
 
     void LateUpdate()
     {
         if (player == null) return;
 
-        float targetX = player.position.x;
+        float px = player.position.x;
+        float py = player.position.y;
 
-        // Camera stays at baseline, but follows upward once player
-        // goes more than verticalOffset above the current camera Y
-        float targetY = Mathf.Max(baselineHeight, player.position.y - verticalOffset);
+        // Horizontal: only move target when player pushes past the deadzone edge
+        if (px > targetX + deadzoneX)
+            targetX = px - deadzoneX;
+        else if (px < targetX - deadzoneX)
+            targetX = px + deadzoneX;
 
+        // Vertical: only move target when player pushes past the deadzone edge
+        if (py > targetY + deadzoneY)
+            targetY = py - deadzoneY;
+        else if (py < targetY - deadzoneY)
+            targetY = py + deadzoneY;
+
+        currentX = Mathf.SmoothDamp(currentX, targetX, ref velocityX, horizontalSmoothTime);
         currentY = Mathf.SmoothDamp(currentY, targetY, ref velocityY, verticalSmoothTime);
 
-        Vector3 basePos = new Vector3(targetX, currentY, -10f);
+        Vector3 basePos = new Vector3(currentX, currentY, -10f);
         Vector3 shakeOffset = cameraShake != null ? cameraShake.GetShakeOffset() : Vector3.zero;
         transform.position = basePos + shakeOffset;
+    }
+
+    void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+        Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
+        Gizmos.DrawWireCube(new Vector3(targetX, targetY, 0f), new Vector2(deadzoneX * 2f, deadzoneY * 2f));
     }
 }

@@ -11,15 +11,8 @@ public class GunPickup : MonoBehaviour
         startPos = transform.position;
     }
 
-    /// <summary>Call after a pop-out animation to set the hover base position.</summary>
-    public void SetHoverPosition(Vector3 pos)
-    {
-        startPos = pos;
-    }
-
     void Update()
     {
-        // Simple floating animation using Sin wave
         float newY = startPos.y + Mathf.Sin(Time.time * hoverSpeed) * hoverHeight;
         transform.position = new Vector3(startPos.x, newY, startPos.z);
     }
