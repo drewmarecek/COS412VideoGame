@@ -109,10 +109,8 @@ public class PlayerHealth : MonoBehaviour
 
     void RespawnImmediate()
     {
-        // 1. Move the player
         transform.position = currentRespawnPoint;
 
-        // 2. Stop any falling/sliding movement
         if (rb != null)
         {
             rb.simulated = true;
@@ -122,13 +120,27 @@ public class PlayerHealth : MonoBehaviour
         Collider2D col = GetComponent<Collider2D>();
         if (col != null) col.enabled = true;
 
-        // 3. Refill health to max
         health = maxHealth;
-
-        // 4. Give the player 1 full second of invincibility on respawn
         iFrameTimer = 1.0f;
-
         UpdateUI();
-        Debug.Log("Player Respawned with full health and grace period.");
+
+        CameraFollow cam = FindFirstObjectByType<CameraFollow>();
+        if (cam != null)
+            cam.ResetToPlayer();
+
+        ResetBoss();
+    }
+
+    void ResetBoss()
+    {
+        BossController boss = FindFirstObjectByType<BossController>(FindObjectsInactive.Include);
+        if (boss != null && !boss.IsDefeated)
+        {
+            boss.ResetBoss();
+
+            BossActivator activator = FindFirstObjectByType<BossActivator>();
+            if (activator != null)
+                activator.ResetTrigger();
+        }
     }
 }

@@ -9,16 +9,17 @@ public class BossActivator : MonoBehaviour
     {
         if (other.CompareTag("Player") && !hasTriggered)
         {
-            // Use the faster method we discussed earlier
-            BossController boss = Object.FindFirstObjectByType<BossController>();
-            
+            BossController boss = FindFirstObjectByType<BossController>();
+
             if (boss != null)
-            {
                 boss.isActive = true;
-                Debug.Log("Boss Aggro Triggered!");
-            }
 
             if (triggerOnlyOnce) hasTriggered = true;
         }
+    }
+
+    public void ResetTrigger()
+    {
+        hasTriggered = false;
     }
 }

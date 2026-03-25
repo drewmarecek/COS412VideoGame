@@ -75,6 +75,17 @@ public class CameraFollow : MonoBehaviour
         transform.position = basePos + shakeOffset;
     }
 
+    public void ResetToPlayer()
+    {
+        if (player == null) return;
+        targetX = player.position.x;
+        targetY = player.position.y + spawnOffset;
+        currentX = targetX;
+        currentY = targetY;
+        velocityX = 0f;
+        velocityY = 0f;
+    }
+
     void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;
