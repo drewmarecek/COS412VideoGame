@@ -4,13 +4,19 @@ public class CameraFollow : MonoBehaviour
 {
     public Transform player;
 
-    // Set this to the Y-position where you want the camera to sit by default
+    [Header("Vertical")]
+    [Tooltip("The default camera Y position when the player is on the ground")]
     public float baselineHeight = 0.7f;
+    [Tooltip("How far above the camera center the player can go before the camera follows them up")]
+    public float verticalOffset = 1.5f;
 
-    // 1. Define the step size here (1.5 units)
-    public float stepSize = 1.5f;
+    [Header("Smoothing")]
+    [Tooltip("How quickly the camera catches up vertically (lower = smoother)")]
+    public float verticalSmoothTime = 0.25f;
 
     private CameraShake cameraShake;
+    private float currentY;
+    private float velocityY;
 
     void Start()
     {
@@ -18,43 +24,28 @@ public class CameraFollow : MonoBehaviour
         {
             GameObject p = GameObject.FindGameObjectWithTag("Player");
             if (p != null)
-            {
                 player = p.transform;
-                Debug.Log("Camera found the Player automatically!");
-            }
-            else
-            {
-                Debug.LogError("CAMERA ERROR: Could not find an object tagged 'Player'!");
-            }
         }
 
         cameraShake = GetComponent<CameraShake>();
+
+        if (player != null)
+            currentY = baselineHeight;
     }
 
     void LateUpdate()
     {
         if (player == null) return;
 
-        // --- X AXIS (Horizontal) ---
         float targetX = player.position.x;
 
-        // --- Y AXIS (Vertical) ---
-        // OLD LOGIC: targetY = baselineHeight;
-        
-        // NEW LOGIC: Grid Snapping
-        // 1. Get player's distance from the baseline
-        float difference = player.position.y - baselineHeight;
+        // Camera stays at baseline, but follows upward once player
+        // goes more than verticalOffset above the current camera Y
+        float targetY = Mathf.Max(baselineHeight, player.position.y - verticalOffset);
 
-        // 2. Calculate how many "1.5 steps" fit into that difference.
-        //    (int) casting cuts off the decimal, creating the "step" effect.
-        int steps = (int)(difference / stepSize);
+        currentY = Mathf.SmoothDamp(currentY, targetY, ref velocityY, verticalSmoothTime);
 
-        // 3. Multiply the steps back by the stepSize to get the grid position
-        //    Example: If steps = 2, targetY becomes 3.0.
-        float targetY = baselineHeight + (steps * stepSize);
-
-        // Apply position with screen shake
-        Vector3 basePos = new Vector3(targetX, targetY, -10f);
+        Vector3 basePos = new Vector3(targetX, currentY, -10f);
         Vector3 shakeOffset = cameraShake != null ? cameraShake.GetShakeOffset() : Vector3.zero;
         transform.position = basePos + shakeOffset;
     }

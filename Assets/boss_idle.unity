@@ -171681,7 +171681,7 @@ MonoBehaviour:
   moveSpeed: 1
   damageValue: 1
   deathDisappearDelay: 1
-  detectionRange: 1.4
+  detectionRange: 1.9
   attackRange: 1
   attackCooldown: 1.8
   swordHitbox: {fileID: 262650086}
