@@ -7,13 +7,22 @@ public class BossController : MonoBehaviour
     public float maxHealth = 100f;
     public float moveSpeed = 2.5f;
     public float attackRange = 2.2f;
-    public int damageValue = 20;
+    public int damageValue = 1;
     public float attackCooldown = 2.0f;
     public float deathDisappearDelay = 1.5f;
+    [Tooltip("Fallback timing used if animation events are missing.")]
+    public float attackDamageDelay = 0.25f;
+    [Tooltip("Failsafe: end attack state even if ResetAttack animation event is missing.")]
+    public float attackRecoverTime = 0.8f;
 
     [Header("References")]
     [Tooltip("Treasure chest that drops when boss dies.")]
     public GameObject treasureChestPrefab;
+    [Header("Attack Hitbox")]
+    [Tooltip("Optional: drag boss weapon hitbox collider here (recommended).")]
+    public Collider2D swordHitbox;
+    [Tooltip("If true, boss damage should come from sword hitbox collider/EnemyAttack, not overlap radius.")]
+    public bool useHitboxDamage = true;
     public Transform attackPoint;
     public float attackRadius = 1.5f;
     public LayerMask playerLayer;
@@ -27,6 +36,7 @@ public class BossController : MonoBehaviour
     private float nextAttackTime;
     private bool isDead = false;
     private bool isAttacking = false;
+    private bool didDealDamageThisAttack = false;
     public bool isActive = false;
     public bool IsDefeated { get; private set; }
 
@@ -40,6 +50,7 @@ public class BossController : MonoBehaviour
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         sprites = GetComponentsInChildren<SpriteRenderer>();
+        if (swordHitbox != null) swordHitbox.enabled = false;
 
         startPosition = transform.position;
         startScale = transform.localScale;
@@ -84,16 +95,31 @@ public class BossController : MonoBehaviour
     void StartAttack()
     {
         isAttacking = true;
+        didDealDamageThisAttack = false;
         anim.SetBool("isRunning", false);
         anim.SetTrigger("Attack" + Random.Range(1, 3));
         nextAttackTime = Time.time + attackCooldown;
+        if (!useHitboxDamage)
+            StartCoroutine(AttackDamageFallback());
+        StartCoroutine(AttackRecoverFallback());
     }
 
-    // CALLED BY ANIMATION EVENT
+    // CALLED BY ANIMATION EVENT (legacy circle-based damage path)
     public void DealDamage()
     {
-        Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint.position, attackRadius, playerLayer);
-        if (hitPlayer != null)
+        if (useHitboxDamage) return;
+        if (didDealDamageThisAttack) return;
+        didDealDamageThisAttack = true;
+
+        Vector2 hitCenter = attackPoint != null ? attackPoint.position : transform.position;
+
+        Collider2D hitPlayer = null;
+        if (playerLayer.value != 0)
+            hitPlayer = Physics2D.OverlapCircle(hitCenter, attackRadius, playerLayer);
+        else
+            hitPlayer = Physics2D.OverlapCircle(hitCenter, attackRadius);
+
+        if (hitPlayer != null && hitPlayer.CompareTag("Player"))
         {
             PlayerHealth playerHealth = hitPlayer.GetComponent<PlayerHealth>();
             if (playerHealth != null)
@@ -104,24 +130,48 @@ public class BossController : MonoBehaviour
         }
     }
 
-    public void ResetAttack() { isAttacking = false; }
-
-    private void OnCollisionEnter2D(Collision2D collision) { TryDamagePlayer(collision.gameObject); }
-    private void OnTriggerEnter2D(Collider2D other) { TryDamagePlayer(other.gameObject); }
-
-    private void TryDamagePlayer(GameObject other)
+    public void ResetAttack()
     {
-        if (isDead || !isActive) return;
-        if (other.CompareTag("Player"))
-        {
-            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                TriggerPlayerHitEffects(playerHealth, damageValue);
-                playerHealth.TakeDamage(damageValue);
-            }
-        }
+        isAttacking = false;
+        CloseHitbox();
     }
+
+    // CALLED BY ANIMATION EVENT — opens sword hitbox window
+    public void OpenHitbox()
+    {
+        if (!useHitboxDamage) return;
+        if (swordHitbox != null) swordHitbox.enabled = true;
+    }
+
+    // CALLED BY ANIMATION EVENT — closes sword hitbox window
+    public void CloseHitbox()
+    {
+        if (swordHitbox != null) swordHitbox.enabled = false;
+    }
+
+    private IEnumerator AttackDamageFallback()
+    {
+        yield return new WaitForSeconds(attackDamageDelay);
+
+        // If animation event was not configured, still apply one melee hit.
+        if (isAttacking && !didDealDamageThisAttack)
+            DealDamage();
+    }
+
+    private IEnumerator AttackRecoverFallback()
+    {
+        yield return new WaitForSeconds(attackRecoverTime);
+
+        // If animation did not call ResetAttack(), unlock AI so boss can keep fighting.
+        if (isAttacking)
+            ResetAttack();
+
+        // Safety: ensure hitbox is not left active.
+        CloseHitbox();
+    }
+
+    // Intentionally no generic contact-damage.
+    // Boss damages via sword hitbox (preferred) or DealDamage() fallback path.
 
     void TriggerPlayerHitEffects(PlayerHealth playerHealth, int damage)
     {

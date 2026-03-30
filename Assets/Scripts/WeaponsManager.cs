@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class WeaponManager : MonoBehaviour
 {
+    // Persist weapon inventory/state across scene loads.
+    private static bool persistedHasGun = false;
+    private static bool persistedGunEquipped = false;
+
     [Header("Weapon Objects")]
     public GameObject swordObject; // Drag your Sword child here
     public GameObject gunObject;   // Drag your Gun child here
@@ -11,9 +15,9 @@ public class WeaponManager : MonoBehaviour
 
     void Start()
     {
-        // The "if != null" checks prevent the error if a slot is empty
-        if (swordObject != null) swordObject.SetActive(true);
-        if (gunObject != null) gunObject.SetActive(false);
+        // Restore inventory/equipped state when entering a new scene.
+        hasGun = persistedHasGun;
+        ApplyWeaponVisualState();
     }
 
     void Update()
@@ -53,14 +57,42 @@ public class WeaponManager : MonoBehaviour
         
         if (swordObject != null) swordObject.SetActive(!isSwordActive);
         if (gunObject != null) gunObject.SetActive(isSwordActive);
+
+        persistedGunEquipped = gunObject != null && gunObject.activeSelf;
     }
 
     // Call this function when the player touches the pickup
     public void UnlockGun()
     {
         hasGun = true;
+        persistedHasGun = true;
+        persistedGunEquipped = true;
+
         // Optional: Auto-switch to gun immediately upon pickup
-        swordObject.SetActive(false);
-        gunObject.SetActive(true);
+        if (swordObject != null) swordObject.SetActive(false);
+        if (gunObject != null) gunObject.SetActive(true);
+    }
+
+    private void ApplyWeaponVisualState()
+    {
+        // Default for new game / no gun.
+        if (!hasGun)
+        {
+            if (swordObject != null) swordObject.SetActive(true);
+            if (gunObject != null) gunObject.SetActive(false);
+            return;
+        }
+
+        // Has gun: restore last equipped weapon.
+        if (persistedGunEquipped)
+        {
+            if (swordObject != null) swordObject.SetActive(false);
+            if (gunObject != null) gunObject.SetActive(true);
+        }
+        else
+        {
+            if (swordObject != null) swordObject.SetActive(true);
+            if (gunObject != null) gunObject.SetActive(false);
+        }
     }
 }

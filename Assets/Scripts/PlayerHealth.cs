@@ -142,5 +142,15 @@ public class PlayerHealth : MonoBehaviour
             if (activator != null)
                 activator.ResetTrigger();
         }
+
+        boss2Script boss2 = FindFirstObjectByType<boss2Script>(FindObjectsInactive.Include);
+        if (boss2 != null && !boss2.IsDefeated)
+        {
+            boss2.ResetBoss();
+
+            Boss2Activator boss2Activator = FindFirstObjectByType<Boss2Activator>();
+            if (boss2Activator != null)
+                boss2Activator.ResetTrigger();
+        }
     }
 }
