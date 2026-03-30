@@ -12,17 +12,16 @@ Done - add filler in first level
 Done - refine boss
 Done - Rapid fire with gun, hold to shoot
 Done - make it so you can't go left off the start
-
+Done - Begin working on level 2
+Done - Create level 2 boss
+Done - Fix camera movement when going up
+Done - Add basic combat effects
 
 **Add for next class:**
 ---------------------------------------------------------------
 
-Add more combat effects (and maybe death effects as well)
-Begin working on level 2
-Get level 2 boss sprite
-Fix camera movement when going up
+Create level 2
 
-Mention that I think I should jump between level 1 and 2 with things to add
 
 **To add soon:**
 ---------------------------------------------------------------
