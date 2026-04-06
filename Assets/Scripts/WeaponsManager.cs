@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class WeaponManager : MonoBehaviour
 {
@@ -15,6 +16,13 @@ public class WeaponManager : MonoBehaviour
 
     void Start()
     {
+        // Level 2 starts with the gun available (no chest/pickup required).
+        if (SceneManager.GetActiveScene().name == "second_level")
+        {
+            UnlockGun();
+            return;
+        }
+
         // Restore inventory/equipped state when entering a new scene.
         hasGun = persistedHasGun;
         ApplyWeaponVisualState();

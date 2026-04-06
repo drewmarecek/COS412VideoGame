@@ -27,6 +27,8 @@ public class boss2Script : MonoBehaviour
     [SerializeField] private float walkSpeed = 2.2f;
     [SerializeField] private float flyVerticalBoost = 1.0f;
     [SerializeField] private float flySpeed = 5.4f;
+    [SerializeField] private float flyAscendSpeed = 11f;
+    [SerializeField] private float flyDescendSpeed = 5.5f;
     [SerializeField] private float xStopDistance = 1.6f;
 
     [Header("Phase Mix")]
@@ -42,11 +44,26 @@ public class boss2Script : MonoBehaviour
     [SerializeField] private float attackCooldown = 1.4f;
     [SerializeField] private float attackRecoverFallback = 0.9f;
 
+    [Header("Dash attack (ground only — starts on OpenHitbox)")]
+    [SerializeField] [Range(0f, 1f)] private float dashAttackChance = 0.32f;
+    [SerializeField] private float dashSpeed = 26f;
+    [SerializeField] private float dashDuration = 0.42f;
+
+    [Header("Divebomb (flying phase only — slower than flying eyes)")]
+    [SerializeField] [Range(0f, 1f)] private float diveBombChance = 0.28f;
+    [SerializeField] private float diveBombSpeed = 5.5f;
+    [SerializeField] private float diveBombMaxTime = 2.2f;
+    [SerializeField] private float diveBombEndDistance = 1.25f;
+
     [Header("Attack Hitboxes")]
     [SerializeField] private Collider2D[] attackHitboxes;
 
     private enum MovePhase { Walking, Flying }
+    private enum PendingSpecialAttack { None, Dash, DiveBomb }
+
     private MovePhase currentPhase = MovePhase.Walking;
+    private PendingSpecialAttack pendingSpecial = PendingSpecialAttack.None;
+    private Coroutine attackMoveCoroutine;
     private float phaseTimer;
     private float attackTimer;
     private bool isAttacking;
@@ -170,8 +187,11 @@ public class boss2Script : MonoBehaviour
         Vector2 toTarget = (flyTarget - rb.position).normalized;
         Vector2 boostedDir = (toTarget + Vector2.up * flyVerticalBoost).normalized;
         Vector2 stepTarget = rb.position + boostedDir;
-        Vector2 newPos = Vector2.MoveTowards(rb.position, stepTarget, flySpeed * Time.deltaTime);
-        rb.MovePosition(newPos);
+        float dt = Time.deltaTime;
+        float nx = Mathf.MoveTowards(rb.position.x, stepTarget.x, flySpeed * dt);
+        float ySpeed = stepTarget.y > rb.position.y ? flyAscendSpeed : flyDescendSpeed;
+        float ny = Mathf.MoveTowards(rb.position.y, stepTarget.y, ySpeed * dt);
+        rb.MovePosition(new Vector2(nx, ny));
         rb.linearVelocity = Vector2.zero;
     }
 
@@ -179,6 +199,12 @@ public class boss2Script : MonoBehaviour
     {
         isAttacking = true;
         attackTimer = attackCooldown;
+        pendingSpecial = PendingSpecialAttack.None;
+
+        if (currentPhase == MovePhase.Flying && Random.value < diveBombChance)
+            pendingSpecial = PendingSpecialAttack.DiveBomb;
+        else if (currentPhase == MovePhase.Walking && IsGrounded() && Random.value < dashAttackChance)
+            pendingSpecial = PendingSpecialAttack.Dash;
 
         if (rb != null)
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
@@ -204,6 +230,24 @@ public class boss2Script : MonoBehaviour
     public void OpenHitbox()
     {
         SetHitboxesEnabled(true);
+
+        if (pendingSpecial == PendingSpecialAttack.Dash)
+        {
+            if (!IsGrounded())
+                pendingSpecial = PendingSpecialAttack.None;
+            else
+            {
+                StopAttackMoveCoroutine();
+                attackMoveCoroutine = StartCoroutine(DashChargeRoutine());
+            }
+        }
+        else if (pendingSpecial == PendingSpecialAttack.DiveBomb)
+        {
+            StopAttackMoveCoroutine();
+            attackMoveCoroutine = StartCoroutine(DiveBombRoutine());
+        }
+
+        pendingSpecial = PendingSpecialAttack.None;
     }
 
     // Animation Event
@@ -215,8 +259,49 @@ public class boss2Script : MonoBehaviour
     // Animation Event
     public void ResetAttack()
     {
+        StopAttackMoveCoroutine();
         isAttacking = false;
         SetHitboxesEnabled(false);
+    }
+
+    void StopAttackMoveCoroutine()
+    {
+        if (attackMoveCoroutine == null) return;
+        StopCoroutine(attackMoveCoroutine);
+        attackMoveCoroutine = null;
+    }
+
+    IEnumerator DashChargeRoutine()
+    {
+        float dir = Mathf.Sign(transform.localScale.x);
+        if (dir == 0f) dir = 1f;
+        float elapsed = 0f;
+        while (elapsed < dashDuration && isAttacking && rb != null && isActive && !isDead)
+        {
+            elapsed += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+            rb.MovePosition(rb.position + new Vector2(dir * dashSpeed * Time.fixedDeltaTime, 0f));
+            rb.linearVelocity = Vector2.zero;
+        }
+        attackMoveCoroutine = null;
+    }
+
+    IEnumerator DiveBombRoutine()
+    {
+        float elapsed = 0f;
+        while (elapsed < diveBombMaxTime && isAttacking && rb != null && isActive && !isDead && player != null)
+        {
+            Vector2 to = (Vector2)player.position - rb.position;
+            float d = to.magnitude;
+            if (d <= diveBombEndDistance)
+                break;
+            if (d > 0.01f)
+                rb.MovePosition(rb.position + (to / d) * (diveBombSpeed * Time.fixedDeltaTime));
+            elapsed += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+            rb.linearVelocity = Vector2.zero;
+        }
+        attackMoveCoroutine = null;
     }
 
     public void TakeDamage(int amount)
@@ -227,6 +312,7 @@ public class boss2Script : MonoBehaviour
         if (anim != null) anim.SetTrigger("takeHit");
 
         // Critical: interrupted attack must not leave hitboxes enabled.
+        StopAttackMoveCoroutine();
         SetHitboxesEnabled(false);
         isAttacking = false;
 
@@ -240,6 +326,7 @@ public class boss2Script : MonoBehaviour
         isDead = true;
         IsDefeated = true;
 
+        StopAttackMoveCoroutine();
         // Critical: disable attack hitboxes on death as well.
         SetHitboxesEnabled(false);
         isAttacking = false;
@@ -262,6 +349,7 @@ public class boss2Script : MonoBehaviour
     {
         isActive = false;
         isAttacking = false;
+        StopAttackMoveCoroutine();
         SetHitboxesEnabled(false);
         if (rb != null) rb.linearVelocity = Vector2.zero;
     }
@@ -269,12 +357,14 @@ public class boss2Script : MonoBehaviour
     public void ResetBoss()
     {
         StopAllCoroutines();
+        attackMoveCoroutine = null;
 
         currentHealth = maxHealth;
         isDead = false;
         IsDefeated = false;
         isActive = false;
         isAttacking = false;
+        pendingSpecial = PendingSpecialAttack.None;
         attackTimer = 0f;
         phaseTimer = Random.Range(walkPhaseDuration.x, walkPhaseDuration.y);
         currentPhase = MovePhase.Walking;

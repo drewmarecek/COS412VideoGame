@@ -7,12 +7,14 @@ public class EnemyHealth : MonoBehaviour
 
     private EnemyAI enemyAI;
     private SkeletonAI skeletonAI;
+    private FlyingDiveEnemy flyingDiveEnemy;
 
     void Start()
     {
         currentHealth = maxHealth;
         enemyAI = GetComponent<EnemyAI>();
         skeletonAI = GetComponent<SkeletonAI>();
+        flyingDiveEnemy = GetComponent<FlyingDiveEnemy>();
     }
 
     public void TakeDamage(int damage)
@@ -29,6 +31,8 @@ public class EnemyHealth : MonoBehaviour
 
         if (enemyAI != null)
             enemyAI.ApplyKnockback();
+        else if (flyingDiveEnemy != null)
+            flyingDiveEnemy.ApplyKnockback();
 
         if (currentHealth <= 0)
         {

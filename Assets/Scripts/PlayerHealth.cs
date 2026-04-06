@@ -76,6 +76,9 @@ public class PlayerHealth : MonoBehaviour
 
         for (int i = 0; i < hearts.Length; i++)
         {
+            // Level 2 (or prefab overrides) may leave slots unassigned — skip safely.
+            if (hearts[i] == null) continue;
+
             hearts[i].SetActive(i < health);
         }
     }
