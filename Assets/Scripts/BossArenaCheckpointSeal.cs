@@ -7,13 +7,17 @@ using UnityEngine;
 ///
 /// Put all block objects as <b>direct children</b> of bossGate, assign that parent to
 /// <see cref="existingBlocksParent"/>. First visit: blocks move up at start, then fall when triggered.
-/// PlayerPrefs remembers the seal after that (see <see cref="ClearSealSaveForTesting"/> to reset).
+/// PlayerPrefs remembers the seal in builds. In the Editor, persistence is off by default so every
+/// Play Mode run lifts the wall again (enable <see cref="persistSealInEditor"/> to test saves in Editor).
 /// </summary>
 public class BossArenaCheckpointSeal : MonoBehaviour
 {
     [Header("Persistence")]
-    [Tooltip("Unique key per barrier. Empty = no save across sessions.")]
+    [Tooltip("Unique key per barrier. Empty = no save anywhere.")]
     [SerializeField] string playerPrefsKey = "Level2_PreBossBarrierSealed";
+
+    [Tooltip("If off (default), the Editor ignores PlayerPrefs — wall lifts every time you press Play. Builds always save/load the seal.")]
+    [SerializeField] bool persistSealInEditor = false;
 
     [Header("Blocks — easy mode")]
     [Tooltip("Drag bossGate. Each direct child = one block.")]
@@ -58,7 +62,6 @@ public class BossArenaCheckpointSeal : MonoBehaviour
             if (IsPersistedSealed())
             {
                 gateFallFinished = true;
-                Debug.Log($"BossArenaCheckpointSeal: save key '{playerPrefsKey}' is already set — wall stays down. Use component menu 'Clear Seal Save For Testing' to see the lift again.", this);
                 return;
             }
 
@@ -105,18 +108,24 @@ public class BossArenaCheckpointSeal : MonoBehaviour
         StartCoroutine(FallBlocksIn());
     }
 
+    bool UseDiskPersistence()
+    {
+        if (string.IsNullOrEmpty(playerPrefsKey)) return false;
+        if (!Application.isEditor) return true;
+        return persistSealInEditor;
+    }
+
     bool IsPersistedSealed()
     {
-        return !string.IsNullOrEmpty(playerPrefsKey) && PlayerPrefs.GetInt(playerPrefsKey, 0) == 1;
+        if (!UseDiskPersistence()) return false;
+        return PlayerPrefs.GetInt(playerPrefsKey, 0) == 1;
     }
 
     void PersistSeal()
     {
-        if (!string.IsNullOrEmpty(playerPrefsKey))
-        {
-            PlayerPrefs.SetInt(playerPrefsKey, 1);
-            PlayerPrefs.Save();
-        }
+        if (!UseDiskPersistence()) return;
+        PlayerPrefs.SetInt(playerPrefsKey, 1);
+        PlayerPrefs.Save();
     }
 
     [ContextMenu("Clear Seal Save For Testing")]
