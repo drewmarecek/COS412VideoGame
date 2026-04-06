@@ -31,6 +31,7 @@ music/sound effects
 make the sword longer
 yoshi
 Use AI to improve the visuals **
+Add visuals to show player the controls.
 
 **To add in the future:**
 ---------------------------------------------------------------
