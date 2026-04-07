@@ -1,45 +1,70 @@
-**Implemented:**
----------------------------------------------------------------
-Done - Guns
-Done - Fix movement bug
-Done - Fix camera movement so it doens't follow the player so closely when they jump
-Done - Bullet despawn
-Done - Add a shake or pause whenever somebody is hit or just for headshots
-Done - Swinging scythes from the ceiling
-Done - add first miniboss
-Done - make ak47 drop from treasure chest not the boss
-Done - add filler in first level
-Done - refine boss
-Done - Rapid fire with gun, hold to shoot
-Done - make it so you can't go left off the start
-Done - Begin working on level 2
-Done - Create level 2 boss
-Done - Fix camera movement when going up
-Done - Add basic combat effects
+# COS 412 — 2D Action Platformer
 
-**Add for next class:**
----------------------------------------------------------------
+A semester project built in **Unity 6** (2D, URP): sword-and-gun combat, two main levels, bosses, traps, and light game-feel (camera shake, hit stop).
 
-Create level 2
+---
 
+## Requirements
 
-**To add soon:**
----------------------------------------------------------------
-Maybe add a whip with ball on end
-press down to dash
-music/sound effects
-make the sword longer
-yoshi
-Use AI to improve the visuals **
-Add visuals to show player the controls.
+| | |
+|---|---|
+| **Unity** | **6000.2.x** (Unity 6) — see `ProjectSettings/ProjectVersion.txt` |
+| **Template** | 2D / URP |
 
-**To add in the future:**
----------------------------------------------------------------
-Flying enemies (ghouls)
-Falling inanimate saws
-enemies that jump up from the ground
-enemies that throw boomerangs
-some kind of unique movement mechanic
-jump pads
-wall jumping
-lock player in room with enemies that they need to defeat before they move on
+Clone or download the repo, open the project folder in Unity Hub, then open the project.
+
+---
+
+## How to play
+
+1. Open a scene under **`Assets/Scene Levels/`** (recommended):
+   - **`first_level`** — start here for the main flow.
+   - **`second_level`** — continues after the first boss; the player **starts with the gun** unlocked in this scene.
+2. Press **Play** in the Editor.
+
+### Controls (typical setup)
+
+| Action | Input |
+|--------|--------|
+| Move | Arrow keys / WASD |
+| Aim gun | Mouse |
+| Shoot | Hold **mouse button** (fire rate capped in `GunController`) |
+| Melee | Bound in `PlayerCombat` (often mouse / attack input) |
+| Switch sword ↔ gun | **Q** (after the gun is unlocked — `WeaponManager`) |
+
+Exact bindings depend on your `Input Manager` / component setup in the scene.
+
+---
+
+## Main systems (scripts)
+
+All gameplay scripts live in **`Assets/Scripts/`**.
+
+| Area | Scripts (examples) |
+|------|---------------------|
+| **Player** | `PlayerHealth`, `PlayerCombat`, `WeaponManager`, `GunController`, `HeadAim` |
+| **Enemies** | `EnemyAI`, `EnemyHealth`, `EnemyAttack`, `SkeletonAI`, `FlyingDiveEnemy`, `EnemySpawner` |
+| **Bosses** | `BossController` (level 1), `boss2Script` (level 2), `BossActivaor` / `Boss2Activator` |
+| **World** | `Checkpoint`, `KillZone`, `CameraFollow`, `CameraShake`, `HitStop` |
+| **Traps** | `Spike`, `FallingSpear`, `PendulumSwing`, `BossArenaCheckpointSeal` |
+| **Progression** | `TreasureChest`, `GunPickup`, `BossDefeatTeleportZone` |
+
+---
+
+## Project layout (short)
+
+```
+Assets/
+├── Scene Levels/          # first_level, second_level (main game)
+├── Scripts/               # C# gameplay code
+├── Scenes/                # Extra / legacy scenes (e.g. Level1, SampleScene)
+├── Settings/              # URP / quality / project render settings
+└── …                      # Art, audio, third-party asset folders
+```
+
+---
+
+## Roadmap ideas
+
+Ideas from earlier design notes (not all implemented): extra movement (dash, wall jump, jump pads), more enemy types, audio/music, UI for controls, polish passes.
+

@@ -4299,6 +4299,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -11025,6 +11026,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -28490,6 +28492,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -40684,6 +40687,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -46599,6 +46603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -47410,6 +47415,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -65220,6 +65226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -73412,6 +73419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -97781,6 +97789,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -98095,6 +98104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -103191,6 +103201,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
@@ -134925,6 +134936,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaCheckpointSeal
   playerPrefsKey: Level2_PreBossBarrierSealed
+  persistSealInEditor: 0
   existingBlocksParent: {fileID: 1271695352}
   blockPrefab: {fileID: 0}
   blockAnchors: []
