@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public class SwordHitbox : MonoBehaviour
 {
-    public int damage = 25; // Boosted for testing the Boss!
+    [Tooltip("Damage per hit. Tune in Inspector; bosses often use higher values than regular enemies.")]
+    public int damage = 1;
 
     [Header("Hit VFX")]
     [Tooltip("Assign your slash effect child object here.")]
@@ -78,8 +79,8 @@ public class SwordHitbox : MonoBehaviour
             boss2Script boss2 = other.GetComponentInParent<boss2Script>();
             if (boss2 != null)
             {
-                boss2.TakeDamage(damage);
-                didHit = true;
+                if (boss2.TakeDamage(damage, boss2Script.Boss2DamageSource.Melee))
+                    didHit = true;
             }
         }
 

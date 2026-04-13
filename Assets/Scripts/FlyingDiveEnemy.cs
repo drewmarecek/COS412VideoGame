@@ -103,25 +103,32 @@ public class FlyingDiveEnemy : MonoBehaviour
 
     void Start()
     {
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
+        TryAcquirePlayer();
 
         rb.gravityScale = 0f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         rb.linearVelocity = Vector2.zero;
     }
 
+    void TryAcquirePlayer()
+    {
+        if (player != null && player.gameObject != null && player.gameObject.activeInHierarchy)
+            return;
+
+        player = null;
+        GameObject p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null && p.activeInHierarchy)
+            player = p.transform;
+    }
+
     void FixedUpdate()
     {
+        TryAcquirePlayer();
+
         if (player == null)
         {
-            GameObject p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) player = p.transform;
-            else
-            {
-                StepFigureEightPatrol();
-                return;
-            }
+            StepFigureEightPatrol();
+            return;
         }
 
         if (knockbackTimer > 0f)
@@ -320,11 +327,7 @@ public class FlyingDiveEnemy : MonoBehaviour
     /// <summary>Called by EnemyHealth when the player hits this enemy (same idea as EnemyAI).</summary>
     public void ApplyKnockback()
     {
-        if (player == null)
-        {
-            GameObject p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) player = p.transform;
-        }
+        TryAcquirePlayer();
 
         knockbackTimer = knockbackDuration;
         attackCooldownTimer = postHitAttackDelay;

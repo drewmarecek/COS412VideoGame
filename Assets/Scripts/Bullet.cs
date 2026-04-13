@@ -32,7 +32,7 @@ public class Bullet : MonoBehaviour
         boss2Script boss2 = other.GetComponentInParent<boss2Script>();
         if (boss2 != null)
         {
-            boss2.TakeDamage(damageAmount);
+            boss2.TakeDamage(damageAmount, boss2Script.Boss2DamageSource.Ranged);
             HitStop hitStop = FindFirstObjectByType<HitStop>();
             if (hitStop != null) hitStop.Stop(0.035f, 20);
             Destroy(gameObject);

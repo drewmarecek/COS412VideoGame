@@ -4,8 +4,11 @@ public class HeadAim : MonoBehaviour
 {
     void Update()
     {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
         // 1. Get mouse position
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
         Vector3 direction = mousePos - transform.position;
 
         // 2. Calculate Angle

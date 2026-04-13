@@ -42,9 +42,9 @@ All gameplay scripts live in **`Assets/Scripts/`**.
 
 | Area | Scripts (examples) |
 |------|---------------------|
-| **Player** | `PlayerHealth`, `PlayerCombat`, `WeaponManager`, `GunController`, `HeadAim` |
+| **Player** | `GlitchPlayerController`, `PlayerHealth`, `PlayerCombat`, `WeaponManager`, `GunController`, `HeadAim` |
 | **Enemies** | `EnemyAI`, `EnemyHealth`, `EnemyAttack`, `SkeletonAI`, `FlyingDiveEnemy`, `EnemySpawner` |
-| **Bosses** | `BossController` (level 1), `boss2Script` (level 2), `BossActivaor` / `Boss2Activator` |
+| **Bosses** | `BossController` (level 1), `boss2Script` (level 2), `BossActivator` / `Boss2Activator` |
 | **World** | `Checkpoint`, `KillZone`, `CameraFollow`, `CameraShake`, `HitStop` |
 | **Traps** | `Spike`, `FallingSpear`, `PendulumSwing`, `BossArenaCheckpointSeal` |
 | **Progression** | `TreasureChest`, `GunPickup`, `BossDefeatTeleportZone` |
@@ -67,4 +67,3 @@ Assets/
 ## Roadmap ideas
 
 Ideas from earlier design notes (not all implemented): extra movement (dash, wall jump, jump pads), more enemy types, audio/music, UI for controls, polish passes.
-

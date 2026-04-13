@@ -31,6 +31,8 @@ public class Checkpoint : MonoBehaviour
 
         // 2. Update the Player's Spawn Point to THIS checkpoint
         PlayerHealth healthScript = player.GetComponent<PlayerHealth>();
+        if (healthScript == null)
+            healthScript = player.GetComponentInParent<PlayerHealth>();
         if (healthScript != null)
         {
             // We tell the health script to use this checkpoint's position now

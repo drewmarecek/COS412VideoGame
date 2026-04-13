@@ -66,6 +66,8 @@ public class TreasureChest : MonoBehaviour
             anim.SetBool(openTriggerName, true);
 
         WeaponManager manager = player.GetComponent<WeaponManager>();
+        if (manager == null)
+            manager = player.GetComponentInParent<WeaponManager>();
         if (manager != null)
         {
             StartCoroutine(UnlockGunAfterDelay(manager));

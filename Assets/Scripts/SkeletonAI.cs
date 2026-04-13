@@ -37,7 +37,8 @@ public class SkeletonAI : MonoBehaviour
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        GameObject p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null) player = p.transform;
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         if (swordHitbox != null) swordHitbox.enabled = false;

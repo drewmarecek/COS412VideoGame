@@ -14,6 +14,13 @@ public class WeaponManager : MonoBehaviour
     [Header("Inventory")]
     public bool hasGun = false;    // Starts false
 
+    private Camera gameplayCamera;
+
+    void Awake()
+    {
+        gameplayCamera = Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>();
+    }
+
     void Start()
     {
         // Level 2 starts with the gun available (no chest/pickup required).
@@ -30,8 +37,11 @@ public class WeaponManager : MonoBehaviour
 
     void Update()
     {
+        if (gameplayCamera == null)
+            gameplayCamera = Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>();
+        if (gameplayCamera == null) return;
 
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mousePos = gameplayCamera.ScreenToWorldPoint(Input.mousePosition);
 
         // If mouse is to the left and player is facing right
         if (mousePos.x < transform.position.x && transform.localScale.x > 0)

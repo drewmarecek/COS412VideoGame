@@ -13,7 +13,8 @@ public class EnemySpawner : MonoBehaviour
         {
             if (enemyPrefab != null)
             {
-                Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+                Transform t = spawnPoint != null ? spawnPoint : transform;
+                Instantiate(enemyPrefab, t.position, t.rotation);
             }
             if (spawnOnlyOnce) hasSpawned = true;
         }
