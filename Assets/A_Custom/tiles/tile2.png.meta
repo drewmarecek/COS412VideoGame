@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f6ff9868c0228490f9ef65393f30d553
+guid: ba4867329622f49d3b069653e0b847cf
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8584470466941762476
-    second: drewmarecek_pixel_art_tiling_background_texture_for_2D_side-s_07ee4316-e37a-4a2b-83d8-8662a2d51963_0_0
+      213: -3552569459566352538
+    second: tile2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: drewmarecek_pixel_art_tiling_background_texture_for_2D_side-s_07ee4316-e37a-4a2b-83d8-8662a2d51963_0_0
+      name: tile2_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1536
-        height: 768
+        x: 69
+        y: 215
+        width: 885
+        height: 590
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cab35ee386a222770800000000000000
-      internalID: 8584470466941762476
+      spriteID: 66765aa16ecb2bec0800000000000000
+      internalID: -3552569459566352538
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      drewmarecek_pixel_art_tiling_background_texture_for_2D_side-s_07ee4316-e37a-4a2b-83d8-8662a2d51963_0_0: 8584470466941762476
+      tile2_0: -3552569459566352538
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

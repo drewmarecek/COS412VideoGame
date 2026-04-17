@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ad3da6808df1d4fae857861ae1449f2a
+guid: a85840d206b6b49ee88040f7b856d74c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 384917742208811197
-    second: drewmarecek_This_is_the_current_background_for_my_video_game._8d98a346-3c8a-4198-a496-a9394068220c_2_0
+      213: 4269108728175869260
+    second: pillar_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: drewmarecek_This_is_the_current_background_for_my_video_game._8d98a346-3c8a-4198-a496-a9394068220c_2_0
+      name: pillar_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 2320
-        height: 512
+        x: 435
+        y: 19
+        width: 592
+        height: 745
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: db00a1ca5a0875500800000000000000
-      internalID: 384917742208811197
+      spriteID: c4d317205cbee3b30800000000000000
+      internalID: 4269108728175869260
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      drewmarecek_This_is_the_current_background_for_my_video_game._8d98a346-3c8a-4198-a496-a9394068220c_2_0: 384917742208811197
+      pillar_0: 4269108728175869260
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

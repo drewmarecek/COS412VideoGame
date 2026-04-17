@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: fbe15f87b48564d56851af1f549d9306
+guid: dcb387ea70cb6465ebc85dd93a5af636
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4784766492501110659
-    second: drewmarecek_pixel_art_tiling_background_texture_for_2D_side-s_07ee4316-e37a-4a2b-83d8-8662a2d51963_3_0
+      213: -6925815825315770830
+    second: drewmarecek_Far_away_Colossal_ancient_shattered_stone_islands_101a4a28-fb26-4248-96d4-608a2b11e0c0_3_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: drewmarecek_pixel_art_tiling_background_texture_for_2D_side-s_07ee4316-e37a-4a2b-83d8-8662a2d51963_3_0
+      name: drewmarecek_Far_away_Colossal_ancient_shattered_stone_islands_101a4a28-fb26-4248-96d4-608a2b11e0c0_3_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1536
-        height: 768
+        width: 1456
+        height: 816
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d709741d938199db0800000000000000
-      internalID: -4784766492501110659
+      spriteID: 23e4640933f82ef90800000000000000
+      internalID: -6925815825315770830
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      drewmarecek_pixel_art_tiling_background_texture_for_2D_side-s_07ee4316-e37a-4a2b-83d8-8662a2d51963_3_0: -4784766492501110659
+      drewmarecek_Far_away_Colossal_ancient_shattered_stone_islands_101a4a28-fb26-4248-96d4-608a2b11e0c0_3_0: -6925815825315770830
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

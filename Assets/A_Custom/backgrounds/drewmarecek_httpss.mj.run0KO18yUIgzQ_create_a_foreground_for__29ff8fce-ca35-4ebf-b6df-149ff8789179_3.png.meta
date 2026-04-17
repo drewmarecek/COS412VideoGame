@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 38e39a70f909543f1bfebb21d1ee5093
+guid: 5e0c2c82ed68c4d0d93e904578843fcc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6983814166668984408
-    second: drewmarecek_This_is_my_current_layered_background_for_my_vide_7f2089d5-ac4e-4fbf-98e1-b68cf91e5c7f_0_0
+      213: 7232962623982920201
+    second: drewmarecek_httpss.mj.run0KO18yUIgzQ_create_a_foreground_for__29ff8fce-ca35-4ebf-b6df-149ff8789179_3_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: drewmarecek_This_is_my_current_layered_background_for_my_vide_7f2089d5-ac4e-4fbf-98e1-b68cf91e5c7f_0_0
+      name: drewmarecek_httpss.mj.run0KO18yUIgzQ_create_a_foreground_for__29ff8fce-ca35-4ebf-b6df-149ff8789179_3_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1024
-        height: 1024
+        width: 1456
+        height: 816
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8afba5a6402841f90800000000000000
-      internalID: -6983814166668984408
+      spriteID: 902ed244f25a06460800000000000000
+      internalID: 7232962623982920201
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      drewmarecek_This_is_my_current_layered_background_for_my_vide_7f2089d5-ac4e-4fbf-98e1-b68cf91e5c7f_0_0: -6983814166668984408
+      drewmarecek_httpss.mj.run0KO18yUIgzQ_create_a_foreground_for__29ff8fce-ca35-4ebf-b6df-149ff8789179_3_0: 7232962623982920201
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

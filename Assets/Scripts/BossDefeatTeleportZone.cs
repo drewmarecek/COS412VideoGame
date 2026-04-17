@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.IO;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -106,7 +105,7 @@ public class BossDefeatTeleportZone : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!isUnlocked || boss1 == null || !boss1.IsDefeated || !other.CompareTag("Player")) return;
+        if (!isUnlocked || !other.CompareTag("Player")) return;
 
         playerInside = true;
         if (!requireKeyPress)
@@ -121,8 +120,7 @@ public class BossDefeatTeleportZone : MonoBehaviour
 
     private void TeleportToLevel2()
     {
-        if (!isUnlocked || boss1 == null || !boss1.IsDefeated)
-            return;
+        if (!isUnlocked) return;
 
         int buildIndex = ResolveBuildIndex(level2SceneName);
         if (buildIndex < 0)
@@ -161,12 +159,23 @@ public class BossDefeatTeleportZone : MonoBehaviour
             string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
             if (string.IsNullOrEmpty(scenePath)) continue;
 
-            string fileName = Path.GetFileNameWithoutExtension(scenePath);
+            string fileName = ScenePathToName(scenePath);
             if (string.Equals(fileName, sceneNameOrPath, System.StringComparison.OrdinalIgnoreCase))
                 return i;
         }
 
         return -1;
+    }
+
+    /// <summary>Returns the scene name from a Unity scene path without requiring System.IO.</summary>
+    static string ScenePathToName(string scenePath)
+    {
+        if (string.IsNullOrEmpty(scenePath)) return string.Empty;
+        int slash = scenePath.LastIndexOf('/');
+        int start = slash >= 0 ? slash + 1 : 0;
+        int dot   = scenePath.LastIndexOf('.');
+        int end   = dot > start ? dot : scenePath.Length;
+        return scenePath.Substring(start, end - start);
     }
 
 #if UNITY_EDITOR
@@ -179,7 +188,7 @@ public class BossDefeatTeleportZone : MonoBehaviour
         foreach (string guid in guids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
-            string fileName = Path.GetFileNameWithoutExtension(path);
+            string fileName = ScenePathToName(path);
             if (string.Equals(fileName, sceneName, System.StringComparison.OrdinalIgnoreCase))
                 return path;
         }

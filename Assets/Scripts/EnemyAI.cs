@@ -89,18 +89,12 @@ public class EnemyAI : MonoBehaviour
         else if (player.position.x < transform.position.x && transform.localScale.x > 0) Flip();
     }
 
-    // Triggers when Enemy touches Player
+    // Body contact with the player: back off, but do NOT deal damage.
+    // Damage is handled exclusively by attack hitboxes (EnemyAttack on child colliders).
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
-        {
-            PlayerHealth health = collision.gameObject.GetComponent<PlayerHealth>();
-            if (health != null)
-            {
-                health.TakeDamage(1); // Deal damage
-                StartRetreat();       // Back off!
-            }
-        }
+            StartRetreat();
     }
 
     // Called by EnemyHealth script when player hits US

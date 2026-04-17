@@ -131,6 +131,7 @@ public class PlayerHealth : MonoBehaviour
         if (cam != null)
             cam.ResetToPlayer();
 
+        FallingPlatform.ResetAll();
         ResetBoss();
     }
 
