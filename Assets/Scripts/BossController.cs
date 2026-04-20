@@ -213,6 +213,13 @@ public class BossController : MonoBehaviour
         isDead = true;
         IsDefeated = true;
         if (anim != null) anim.SetTrigger("Death");
+        SamuraiDeathVFX deathVfx = GetComponent<SamuraiDeathVFX>();
+        if (deathVfx == null)
+        {
+            Debug.LogWarning("BossController: SamuraiDeathVFX not found on boss, adding fallback component.", this);
+            deathVfx = gameObject.AddComponent<SamuraiDeathVFX>();
+        }
+        deathVfx.TriggerDeathFlash();
 
         if (treasureChestPrefab != null)
             spawnedChest = Instantiate(treasureChestPrefab, transform.position, Quaternion.identity);

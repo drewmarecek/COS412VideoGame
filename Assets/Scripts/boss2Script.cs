@@ -577,6 +577,13 @@ public class boss2Script : MonoBehaviour
         if (isDead) return;
         isDead = true;
         IsDefeated = true;
+        SamuraiDeathVFX deathVfx = GetComponent<SamuraiDeathVFX>();
+        if (deathVfx == null)
+        {
+            Debug.LogWarning("boss2Script: SamuraiDeathVFX not found on boss, adding fallback component.", this);
+            deathVfx = gameObject.AddComponent<SamuraiDeathVFX>();
+        }
+        deathVfx.TriggerDeathFlash();
 
         SetHitboxesEnabled(false);
         meleeVulnerabilityActive = false;
