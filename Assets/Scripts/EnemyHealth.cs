@@ -29,16 +29,24 @@ public class EnemyHealth : MonoBehaviour
         // Original blob enemy path
         currentHealth -= damage;
 
+        if (currentHealth <= 0)
+        {
+            if (flyingDiveEnemy != null)
+            {
+                HitStop hitStop = FindFirstObjectByType<HitStop>();
+                if (hitStop != null) hitStop.Stop(0.2f, 12);
+                flyingDiveEnemy.PlayDeathAndDestroy();
+                return;
+            }
+
+            Die();
+            return;
+        }
+
         if (enemyAI != null)
             enemyAI.ApplyKnockback();
         else if (flyingDiveEnemy != null)
             flyingDiveEnemy.ApplyKnockback();
-
-        if (currentHealth <= 0)
-        {
-            Die();
-            return;
-        }
 
         Animator anim = GetComponent<Animator>();
         if (anim != null) anim.SetTrigger("TakeHit");

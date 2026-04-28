@@ -3,6 +3,8 @@ using System.Collections;
 
 public class SkeletonAI : MonoBehaviour
 {
+    private const float SkeletonSwingSfxDelay = 0.15f;
+
     [Header("Stats")]
     public int health = 3;
     public float moveSpeed = 2.5f;
@@ -109,9 +111,17 @@ public class SkeletonAI : MonoBehaviour
     {
         isAttacking = true;
         attackResetTimer = 1.0f;
+        StartCoroutine(PlaySkeletonSwingSfxDelayed());
         anim.SetFloat("speed", 0f);
         anim.SetTrigger("attack" + Random.Range(1, 3));
         nextAttackTime = Time.time + attackCooldown;
+    }
+
+    private IEnumerator PlaySkeletonSwingSfxDelayed()
+    {
+        yield return new WaitForSeconds(SkeletonSwingSfxDelay);
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySound("SkeleAttack");
     }
 
     // CALLED BY ANIMATION EVENT — sword swing starts

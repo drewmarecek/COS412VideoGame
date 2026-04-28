@@ -11,12 +11,10 @@ public class PlayerCombat : MonoBehaviour
     public float attackRate = 10f; // Attacks per second
     float nextAttackTime = 0f;
 
-    private WeaponManager weaponManager;
     private Animator anim;
 
     void Start()
     {
-        weaponManager = GetComponent<WeaponManager>();
         anim = GetComponent<Animator>();
     }
 
@@ -27,19 +25,18 @@ public class PlayerCombat : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0))
             {
-                // Only swing if the gun is NOT active
-                if (weaponManager.gunObject != null && !weaponManager.gunObject.activeSelf)
-                {
-                    SwingSword();
-                    // Set cooldown
-                    nextAttackTime = Time.time + 1f / attackRate;
-                }
+                SwingSword();
+                // Set cooldown
+                nextAttackTime = Time.time + 1f / attackRate;
             }
         }
     }
 
     void SwingSword()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySound("SwordHit");
+
         // 1. Play animation
         anim.SetTrigger("Attack");
 

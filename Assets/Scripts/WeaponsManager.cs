@@ -1,38 +1,12 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class WeaponManager : MonoBehaviour
 {
-    // Persist weapon inventory/state across scene loads.
-    private static bool persistedHasGun = false;
-    private static bool persistedGunEquipped = false;
-
-    [Header("Weapon Objects")]
-    public GameObject swordObject; // Drag your Sword child here
-    public GameObject gunObject;   // Drag your Gun child here
-
-    [Header("Inventory")]
-    public bool hasGun = false;    // Starts false
-
     private Camera gameplayCamera;
 
     void Awake()
     {
         gameplayCamera = Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>();
-    }
-
-    void Start()
-    {
-        // Level 2 starts with the gun available (no chest/pickup required).
-        if (SceneManager.GetActiveScene().name == "second_level")
-        {
-            UnlockGun();
-            return;
-        }
-
-        // Restore inventory/equipped state when entering a new scene.
-        hasGun = persistedHasGun;
-        ApplyWeaponVisualState();
     }
 
     void Update()
@@ -53,12 +27,6 @@ public class WeaponManager : MonoBehaviour
         {
             Flip();
         }
-
-        // Toggle weapons with Q, BUT only if we have picked up the gun
-        if (Input.GetKeyDown(KeyCode.Q) && hasGun)
-        {
-            ToggleWeapon();
-        }
     }
 
     void Flip()
@@ -67,50 +35,5 @@ public class WeaponManager : MonoBehaviour
         Vector3 currentScale = transform.localScale;
         currentScale.x *= -1;
         transform.localScale = currentScale;
-    }
-
-    void ToggleWeapon()
-    {
-        bool isSwordActive = swordObject != null && swordObject.activeSelf;
-        
-        if (swordObject != null) swordObject.SetActive(!isSwordActive);
-        if (gunObject != null) gunObject.SetActive(isSwordActive);
-
-        persistedGunEquipped = gunObject != null && gunObject.activeSelf;
-    }
-
-    // Call this function when the player touches the pickup
-    public void UnlockGun()
-    {
-        hasGun = true;
-        persistedHasGun = true;
-        persistedGunEquipped = true;
-
-        // Optional: Auto-switch to gun immediately upon pickup
-        if (swordObject != null) swordObject.SetActive(false);
-        if (gunObject != null) gunObject.SetActive(true);
-    }
-
-    private void ApplyWeaponVisualState()
-    {
-        // Default for new game / no gun.
-        if (!hasGun)
-        {
-            if (swordObject != null) swordObject.SetActive(true);
-            if (gunObject != null) gunObject.SetActive(false);
-            return;
-        }
-
-        // Has gun: restore last equipped weapon.
-        if (persistedGunEquipped)
-        {
-            if (swordObject != null) swordObject.SetActive(false);
-            if (gunObject != null) gunObject.SetActive(true);
-        }
-        else
-        {
-            if (swordObject != null) swordObject.SetActive(true);
-            if (gunObject != null) gunObject.SetActive(false);
-        }
     }
 }

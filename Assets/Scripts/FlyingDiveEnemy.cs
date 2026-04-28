@@ -66,6 +66,9 @@ public class FlyingDiveEnemy : MonoBehaviour
     [Tooltip("Pause at the top before the next dive.")]
     public float holdDuration = 0.4f;
 
+    [Tooltip("If a dive is aborted by hitting geometry first, hold this long before retrying.")]
+    public float wallAbortHoldDuration = 1f;
+
     [Tooltip("After being hit (knockback), wait this long before diving again.")]
     public float postHitAttackDelay = 0.45f;
 
@@ -83,7 +86,14 @@ public class FlyingDiveEnemy : MonoBehaviour
     [Tooltip("How fast to nudge upward per physics step while overlapping geometry.")]
     public float unstickLiftSpeed = 10f;
 
+    [Header("Obstacle Recovery")]
+    [Tooltip("Probe distance used to detect blocking geometry when climbing.")]
+    public float obstacleProbeDistance = 0.12f;
+    [Tooltip("How fast to move during obstacle detour (down + sideways).")]
+    public float obstacleDetourSpeed = 3.25f;
+
     Rigidbody2D rb;
+    Animator animator;
     Transform player;
     Vector2 spawnPosition;
     Phase phase = Phase.Idle;
@@ -94,10 +104,14 @@ public class FlyingDiveEnemy : MonoBehaviour
     float attackCooldownTimer;
     float figureEightPhase;
     bool aggro;
+    bool isDead;
+    bool useWallAbortHold;
+    int forcedDetourDirection;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         spawnPosition = transform.position;
     }
 
@@ -123,6 +137,8 @@ public class FlyingDiveEnemy : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isDead) return;
+
         TryAcquirePlayer();
 
         if (player == null)
@@ -175,7 +191,15 @@ public class FlyingDiveEnemy : MonoBehaviour
                     else
                         rb.linearVelocity = Vector2.zero;
 
-                    if (d <= diveEndDistance || diveTimer >= maxDiveTime)
+                    if (IsTouchingGeometry())
+                    {
+                        useWallAbortHold = true;
+                        float vx = rb.linearVelocity.x;
+                        if (Mathf.Abs(vx) > 0.05f)
+                            forcedDetourDirection = vx > 0f ? -1 : 1;
+                        phase = Phase.Climbing;
+                    }
+                    else if (d <= diveEndDistance || diveTimer >= maxDiveTime)
                         phase = Phase.Climbing;
                 }
                 break;
@@ -187,13 +211,37 @@ public class FlyingDiveEnemy : MonoBehaviour
                     float d = to.magnitude;
                     if (d > climbArriveEpsilon)
                     {
+                        float horizontalIntent = to.x;
+                        bool wantsToGoUp = to.y > 0.05f;
+                        if (forcedDetourDirection != 0)
+                        {
+                            ApplyObstacleDetour(forcedDetourDirection);
+                            forcedDetourDirection = 0;
+                            break;
+                        }
+
+                        if (wantsToGoUp && IsBlockedInDirection(Vector2.up))
+                        {
+                            int sideDir = Mathf.Abs(horizontalIntent) > 0.05f ? (horizontalIntent > 0f ? 1 : -1) : GetAlternatingSideDirection();
+                            ApplyObstacleDetour(sideDir);
+                            break;
+                        }
+
+                        if (Mathf.Abs(horizontalIntent) > 0.05f && IsBlockedInDirection(new Vector2(Mathf.Sign(horizontalIntent), 0f)))
+                        {
+                            int oppositeDir = horizontalIntent > 0f ? -1 : 1;
+                            ApplyObstacleDetour(oppositeDir);
+                            break;
+                        }
+
                         rb.linearVelocity = (to / d) * climbSpeed;
                     }
                     else
                     {
                         rb.position = hover;
                         rb.linearVelocity = Vector2.zero;
-                        holdTimer = holdDuration;
+                        holdTimer = useWallAbortHold ? wallAbortHoldDuration : holdDuration;
+                        useWallAbortHold = false;
                         phase = Phase.Holding;
                     }
                 }
@@ -252,6 +300,67 @@ public class FlyingDiveEnemy : MonoBehaviour
         }
     }
 
+    bool IsTouchingGeometry()
+    {
+        Collider2D col = GetComponent<Collider2D>();
+        if (col == null) return false;
+
+        Bounds b = col.bounds;
+        Vector2 size = (Vector2)b.size * 0.98f;
+        Collider2D[] hits = Physics2D.OverlapBoxAll(b.center, size, 0f, geometryLayers);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider2D h = hits[i];
+            if (h == null) continue;
+            if (h.CompareTag("Player")) continue;
+            if (h.attachedRigidbody == rb) continue;
+            if (h.transform.IsChildOf(transform)) continue;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool IsBlockedInDirection(Vector2 direction)
+    {
+        if (geometryLayers.value == 0) return false;
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col == null) return false;
+
+        Vector2 dir = direction.normalized;
+        if (dir.sqrMagnitude < 0.0001f) return false;
+
+        Bounds b = col.bounds;
+        Vector2 size = (Vector2)b.size * 0.9f;
+        RaycastHit2D hit = Physics2D.BoxCast(b.center, size, 0f, dir, obstacleProbeDistance, geometryLayers);
+        return IsBlockingGeometryHit(hit.collider);
+    }
+
+    bool IsBlockingGeometryHit(Collider2D hit)
+    {
+        if (hit == null) return false;
+        if (hit.CompareTag("Player")) return false;
+        if (hit.attachedRigidbody == rb) return false;
+        if (hit.transform.IsChildOf(transform)) return false;
+        return true;
+    }
+
+    void ApplyObstacleDetour(int sideDirection)
+    {
+        if (sideDirection == 0)
+            sideDirection = GetAlternatingSideDirection();
+
+        rb.linearVelocity = new Vector2(Mathf.Sign(sideDirection) * obstacleDetourSpeed, -obstacleDetourSpeed);
+    }
+
+    int GetAlternatingSideDirection()
+    {
+        // Alternate left/right on repeated retries to escape tight corners.
+        forcedDetourDirection = forcedDetourDirection == 1 ? -1 : 1;
+        return forcedDetourDirection;
+    }
+
     Vector2 GetHoverPoint()
     {
         return new Vector2(player.position.x + hoverOffsetX, player.position.y + heightAbovePlayer);
@@ -262,6 +371,8 @@ public class FlyingDiveEnemy : MonoBehaviour
         diveTimer = 0f;
         rb.linearVelocity = Vector2.zero;
         phase = Phase.Diving;
+        if (animator != null)
+            animator.SetTrigger("Attack");
     }
 
     /// <summary>Lemniscate of Gerono centered on spawn: ∞ shape in X/Y.</summary>
@@ -327,6 +438,8 @@ public class FlyingDiveEnemy : MonoBehaviour
     /// <summary>Called by EnemyHealth when the player hits this enemy (same idea as EnemyAI).</summary>
     public void ApplyKnockback()
     {
+        if (isDead) return;
+
         TryAcquirePlayer();
 
         knockbackTimer = knockbackDuration;
@@ -341,6 +454,13 @@ public class FlyingDiveEnemy : MonoBehaviour
 
         rb.linearVelocity = Vector2.zero;
         rb.AddForce(new Vector2(dirX * knockbackForce, knockbackForce * 0.35f), ForceMode2D.Impulse);
+    }
+
+    public void PlayDeathAndDestroy()
+    {
+        if (isDead) return;
+        isDead = true;
+        Destroy(gameObject);
     }
 
     void OnDrawGizmosSelected()

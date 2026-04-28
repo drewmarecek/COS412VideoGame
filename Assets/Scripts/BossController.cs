@@ -3,6 +3,8 @@ using System.Collections;
 
 public class BossController : MonoBehaviour
 {
+    private const float SwordSwingSfxDelay = 0.3f;
+
     [Header("Stats")]
     public float maxHealth = 100f;
     public float moveSpeed = 2.5f;
@@ -14,6 +16,31 @@ public class BossController : MonoBehaviour
     public float attackDamageDelay = 0.25f;
     [Tooltip("Failsafe: end attack state even if ResetAttack animation event is missing.")]
     public float attackRecoverTime = 0.8f;
+    [Tooltip("Delay before boss hit feedback (camera shake + hit stop).")]
+    public float playerHitEffectsDelay = 0.1f;
+    [Header("Damage Shake Scaling")]
+    [Tooltip("Shake intensity when boss is near full health.")]
+    public float lowHealthShakeMinIntensity = 0.08f;
+    [Tooltip("Shake intensity when boss is near death.")]
+    public float lowHealthShakeMaxIntensity = 0.26f;
+    [Tooltip("Shake duration when boss is near full health.")]
+    public float lowHealthShakeMinDuration = 0.1f;
+    [Tooltip("Shake duration when boss is near death.")]
+    public float lowHealthShakeMaxDuration = 0.22f;
+
+    [Header("Player Hit Shake Scaling")]
+    [Tooltip("Shake intensity for player hit when player is at full health.")]
+    public float playerHitShakeMinIntensity = 0.08f;
+    [Tooltip("Shake intensity for player hit when player is near death (non-fatal).")]
+    public float playerHitShakeMaxIntensity = 0.28f;
+    [Tooltip("Shake duration for player hit when player is at full health.")]
+    public float playerHitShakeMinDuration = 0.12f;
+    [Tooltip("Shake duration for player hit when player is near death (non-fatal).")]
+    public float playerHitShakeMaxDuration = 0.3f;
+
+    [Header("Player Hit Pause")]
+    [Tooltip("Hit-stop duration when the player is hit by this boss (non-fatal).")]
+    public float playerHitPauseDuration = 0.12f;
 
     [Header("References")]
     [Tooltip("Treasure chest that drops when boss dies.")]
@@ -25,6 +52,10 @@ public class BossController : MonoBehaviour
     public bool useHitboxDamage = true;
     public Transform attackPoint;
     public float attackRadius = 1.5f;
+    [Tooltip("Distance the boss must reach before starting an attack.")]
+    public float requiredAttackDistance = 1.2f;
+    [Tooltip("How close boss tries to stand to the player while chasing.")]
+    public float followStopDistance = 2.25f;
     public LayerMask playerLayer;
 
     private Transform player;
@@ -65,19 +96,38 @@ public class BossController : MonoBehaviour
         if (!isActive || isDead || player == null) return;
 
         FacePlayer();
-
-        if (isAttacking) return;
-
         float distance = Vector2.Distance(transform.position, player.position);
+        float attackEngageRange = Mathf.Max(0.1f, requiredAttackDistance);
+        float chaseStopRange = Mathf.Max(0.1f, followStopDistance);
+        bool cooldownReady = Time.time >= nextAttackTime;
 
-        if (distance <= attackRange)
+        // If attack started but player moved out of practical melee range, cancel and chase again.
+        if (isAttacking)
         {
-            if (Time.time >= nextAttackTime)
-                StartAttack();
+            if (distance > attackEngageRange)
+            {
+                ResetAttack();
+                Move();
+            }
+            return;
         }
-        else
+
+        if (cooldownReady && distance <= attackEngageRange)
+        {
+            StartAttack();
+        }
+        else if (cooldownReady && distance > attackEngageRange)
+        {
+            // Cooldown finished but still out of range: close distance until attack is possible.
+            Move();
+        }
+        else if (distance > chaseStopRange)
         {
             Move();
+        }
+        else if (anim != null)
+        {
+            anim.SetBool("isRunning", false);
         }
     }
 
@@ -100,6 +150,7 @@ public class BossController : MonoBehaviour
     {
         isAttacking = true;
         didDealDamageThisAttack = false;
+        StartCoroutine(PlaySwordSwingSfxDelayed());
         if (anim != null)
         {
             anim.SetBool("isRunning", false);
@@ -179,6 +230,13 @@ public class BossController : MonoBehaviour
         CloseHitbox();
     }
 
+    private IEnumerator PlaySwordSwingSfxDelayed()
+    {
+        yield return new WaitForSeconds(SwordSwingSfxDelay);
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySound("Boss1Attack");
+    }
+
     // Intentionally no generic contact-damage.
     // Boss damages via sword hitbox (preferred) or DealDamage() fallback path.
 
@@ -186,17 +244,45 @@ public class BossController : MonoBehaviour
     {
         if (playerHealth.IsInvincible) return;
         bool willDie = playerHealth.health <= damage;
+        StartCoroutine(PlayPlayerHitEffectsDelayed(willDie));
+    }
+
+    private IEnumerator PlayPlayerHitEffectsDelayed(bool willDie)
+    {
+        if (playerHitEffectsDelay > 0f)
+            yield return new WaitForSeconds(playerHitEffectsDelay);
+
         CameraShake camShake = FindFirstObjectByType<CameraShake>();
         if (camShake != null)
         {
-            if (willDie) camShake.ShakeKill();
-            else camShake.ShakeHit();
+            if (willDie)
+            {
+                camShake.ShakeKill();
+            }
+            else
+            {
+                PlayerHealth ph = FindFirstObjectByType<PlayerHealth>();
+                float hpRatio = (ph != null && ph.maxHealth > 0) ? Mathf.Clamp01((float)ph.health / ph.maxHealth) : 1f;
+                float lowFactor = 1f - hpRatio;
+                float intensity = Mathf.Lerp(playerHitShakeMinIntensity, playerHitShakeMaxIntensity, lowFactor);
+                float duration = Mathf.Lerp(playerHitShakeMinDuration, playerHitShakeMaxDuration, lowFactor);
+                camShake.Shake(intensity, duration);
+            }
         }
+
         HitStop hitStop = FindFirstObjectByType<HitStop>();
         if (hitStop != null)
         {
             if (willDie) hitStop.Stop(0.25f, 15);
-            else hitStop.Stop(0.07f, 45);
+            else hitStop.Stop(playerHitPauseDuration, 45);
+        }
+
+        if (willDie)
+        {
+            SamuraiDeathVFX deathVfx = GetComponent<SamuraiDeathVFX>();
+            if (deathVfx == null)
+                deathVfx = gameObject.AddComponent<SamuraiDeathVFX>();
+            deathVfx.TriggerDeathFlash(true);
         }
     }
 
@@ -204,6 +290,17 @@ public class BossController : MonoBehaviour
     {
         if (isDead || !isActive) return;
         health -= damage;
+
+        CameraShake camShake = FindFirstObjectByType<CameraShake>();
+        if (camShake != null)
+        {
+            float healthRatio = maxHealth > 0f ? Mathf.Clamp01(health / maxHealth) : 0f;
+            float lowHealthFactor = 1f - healthRatio; // 0 at full HP, 1 near zero HP
+            float shakeIntensity = Mathf.Lerp(lowHealthShakeMinIntensity, lowHealthShakeMaxIntensity, lowHealthFactor);
+            float shakeDuration = Mathf.Lerp(lowHealthShakeMinDuration, lowHealthShakeMaxDuration, lowHealthFactor);
+            camShake.Shake(shakeIntensity, shakeDuration);
+        }
+
         if (anim != null) anim.SetTrigger("TakeHit");
         if (health <= 0) Die();
     }
@@ -219,7 +316,7 @@ public class BossController : MonoBehaviour
             Debug.LogWarning("BossController: SamuraiDeathVFX not found on boss, adding fallback component.", this);
             deathVfx = gameObject.AddComponent<SamuraiDeathVFX>();
         }
-        deathVfx.TriggerDeathFlash();
+        deathVfx.TriggerDeathFlash(false, true);
 
         if (treasureChestPrefab != null)
             spawnedChest = Instantiate(treasureChestPrefab, transform.position, Quaternion.identity);

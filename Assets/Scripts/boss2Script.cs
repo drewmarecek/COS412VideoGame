@@ -7,13 +7,15 @@ using UnityEngine;
 /// </summary>
 public class boss2Script : MonoBehaviour
 {
+    private const float SwordSwingSfxDelay = 0.3f;
+
     public enum Boss2DamageSource
     {
-        /// <summary>Projectiles — allowed outside vulnerability; tune hover motion for difficulty.</summary>
+        /// <summary>Projectiles (currently always accepted while boss is active).</summary>
         Ranged,
-        /// <summary>Player sword — only during the recovery vulnerability window.</summary>
+        /// <summary>Player sword (currently always accepted while boss is active).</summary>
         Melee,
-        /// <summary>Same damage rules as <see cref="Ranged"/> (only <see cref="Melee"/> is gated).</summary>
+        /// <summary>Same damage rules as other sources.</summary>
         Unspecified
     }
 
@@ -52,6 +54,11 @@ public class boss2Script : MonoBehaviour
     [Header("Health")]
     [SerializeField] private int maxHealth = 120;
     [SerializeField] private float deathDisappearDelay = 1.5f;
+    [Header("Damage Shake Scaling")]
+    [SerializeField] private float lowHealthShakeMinIntensity = 0.08f;
+    [SerializeField] private float lowHealthShakeMaxIntensity = 0.28f;
+    [SerializeField] private float lowHealthShakeMinDuration = 0.1f;
+    [SerializeField] private float lowHealthShakeMaxDuration = 0.24f;
     private int currentHealth;
     private bool isDead;
 
@@ -99,6 +106,8 @@ public class boss2Script : MonoBehaviour
     [SerializeField] private float swoopSpeed = 22f;
     [Tooltip("Stop swoop when within this distance of the strike point.")]
     [SerializeField] private float swoopArriveEpsilon = 0.22f;
+    [Tooltip("If the boss is nearly centered over the player at telegraph end, offset strike this far to the side.")]
+    [SerializeField] private float minimumStrikeHorizontalOffset = 0.9f;
 
     [Tooltip("Raise the swoop target this far above the ground hit so the boss does not embed in tiles.")]
     [SerializeField] private float strikeGroundClearance = 0.55f;
@@ -280,7 +289,13 @@ public class boss2Script : MonoBehaviour
 
     private Vector2 ComputeLockedStrikePoint()
     {
-        float x = player.position.x;
+        float playerX = player.position.x;
+        float bossX = rb != null ? rb.position.x : transform.position.x;
+        float side = bossX >= playerX ? 1f : -1f;
+        if (Mathf.Abs(bossX - playerX) < 0.05f)
+            side = transform.localScale.x >= 0f ? 1f : -1f;
+
+        float x = playerX + side * minimumStrikeHorizontalOffset;
         Vector2 origin = new Vector2(x, player.position.y + groundProbeYOffset);
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundProbeDistance, groundLayer);
         Vector2 strike = hit.collider != null
@@ -403,7 +418,9 @@ public class boss2Script : MonoBehaviour
         recoveryPhaseTimer = strikeHitboxDuration;
         groundedRecoveryElapsed = 0f;
         meleeVulnerabilityActive = false;
+        FacePlayer();
         SetHitboxesEnabled(true);
+        StartCoroutine(PlaySwordSwingSfxDelayed());
 
         if (anim != null && !string.IsNullOrEmpty(strikeAnimatorTrigger))
             anim.SetTrigger(strikeAnimatorTrigger);
@@ -413,6 +430,13 @@ public class boss2Script : MonoBehaviour
             camShake.ShakeHit();
 
         TryUnstickBossFromGround();
+    }
+
+    private IEnumerator PlaySwordSwingSfxDelayed()
+    {
+        yield return new WaitForSeconds(SwordSwingSfxDelay);
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySound("Boss2Attack");
     }
 
     private void StepRecoveryAscend()
@@ -437,7 +461,7 @@ public class boss2Script : MonoBehaviour
                     recoveryPhaseTimer = vulnerabilityDuration;
                     meleeVulnerabilityActive = true;
                 }
-                FaceToward(lockedStrikePoint.x);
+                FacePlayer();
                 break;
 
             case RecoverySubPhase.Vulnerable:
@@ -541,15 +565,21 @@ public class boss2Script : MonoBehaviour
         TakeDamage(amount, Boss2DamageSource.Ranged);
     }
 
-    /// <returns>False if damage was blocked (e.g. melee during hover) or the boss was inactive/dead.</returns>
+    /// <returns>False only when the boss is inactive/dead.</returns>
     public bool TakeDamage(int amount, Boss2DamageSource source)
     {
         if (isDead || !isActive) return false;
 
-        if (source == Boss2DamageSource.Melee && !meleeVulnerabilityActive)
-            return false;
-
         currentHealth -= amount;
+        CameraShake camShake = FindFirstObjectByType<CameraShake>();
+        if (camShake != null)
+        {
+            float healthRatio = maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f;
+            float lowHealthFactor = 1f - healthRatio; // 0 at full HP, 1 near zero HP
+            float shakeIntensity = Mathf.Lerp(lowHealthShakeMinIntensity, lowHealthShakeMaxIntensity, lowHealthFactor);
+            float shakeDuration = Mathf.Lerp(lowHealthShakeMinDuration, lowHealthShakeMaxDuration, lowHealthFactor);
+            camShake.Shake(shakeIntensity, shakeDuration);
+        }
         if (anim != null) anim.SetTrigger("takeHit");
 
         bool inGroundedRecovery = CurrentCombatState == CombatState.RecoveryAscend;
@@ -583,7 +613,7 @@ public class boss2Script : MonoBehaviour
             Debug.LogWarning("boss2Script: SamuraiDeathVFX not found on boss, adding fallback component.", this);
             deathVfx = gameObject.AddComponent<SamuraiDeathVFX>();
         }
-        deathVfx.TriggerDeathFlash();
+        deathVfx.TriggerDeathFlash(false, true);
 
         SetHitboxesEnabled(false);
         meleeVulnerabilityActive = false;

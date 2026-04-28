@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class TreasureChest : MonoBehaviour
 {
-    [Tooltip("Delay after opening animation before giving the gun")]
-    public float gunUnlockDelay = 0.5f;
-
     [Tooltip("Animator bool name for opening (default: Open)")]
     public string openTriggerName = "Open";
 
@@ -64,19 +61,5 @@ public class TreasureChest : MonoBehaviour
 
         if (anim != null)
             anim.SetBool(openTriggerName, true);
-
-        WeaponManager manager = player.GetComponent<WeaponManager>();
-        if (manager == null)
-            manager = player.GetComponentInParent<WeaponManager>();
-        if (manager != null)
-        {
-            StartCoroutine(UnlockGunAfterDelay(manager));
-        }
-    }
-
-    System.Collections.IEnumerator UnlockGunAfterDelay(WeaponManager manager)
-    {
-        yield return new WaitForSeconds(gunUnlockDelay);
-        manager.UnlockGun();
     }
 }

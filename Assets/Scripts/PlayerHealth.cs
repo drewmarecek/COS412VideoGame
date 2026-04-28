@@ -18,6 +18,8 @@ public class PlayerHealth : MonoBehaviour
     [Header("Death")]
     [Tooltip("Pause before respawning when the player dies")]
     public float respawnDelay = 0.4f;
+    [Tooltip("Scene object name to enable when the player dies.")]
+    public string playerDieMarkObjectName = "PlayerDieMark";
 
     private Vector3 currentRespawnPoint;
     private Rigidbody2D rb;
@@ -30,6 +32,7 @@ public class PlayerHealth : MonoBehaviour
         
         health = maxHealth;
         currentRespawnPoint = transform.position;
+        HidePlayerDieMark();
         
         UpdateUI();
     }
@@ -67,6 +70,26 @@ public class PlayerHealth : MonoBehaviour
         if (health <= 0)
         {
             StartCoroutine(RespawnAfterDelay());
+        }
+    }
+
+    void HidePlayerDieMark()
+    {
+        if (string.IsNullOrWhiteSpace(playerDieMarkObjectName)) return;
+
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < children.Length; i++)
+        {
+            Transform t = children[i];
+            if (t == null || t.name != playerDieMarkObjectName) continue;
+
+            SpriteRenderer[] renderers = t.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int j = 0; j < renderers.Length; j++)
+            {
+                if (renderers[j] != null)
+                    renderers[j].enabled = false;
+            }
+            return;
         }
     }
 
@@ -125,6 +148,7 @@ public class PlayerHealth : MonoBehaviour
 
         health = maxHealth;
         iFrameTimer = 1.0f;
+        HidePlayerDieMark();
         UpdateUI();
 
         CameraFollow cam = FindFirstObjectByType<CameraFollow>();

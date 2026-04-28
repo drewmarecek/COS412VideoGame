@@ -13,6 +13,16 @@ public class SamuraiDeathVFX : MonoBehaviour
     [SerializeField] private Material whiteMaterial;
     [SerializeField] private Color flashColor = Color.black;
 
+    [Header("Player Die Mark")]
+    [Tooltip("Name of an object under the player whose SpriteRenderer should show during the kill screen.")]
+    [SerializeField] private string playerDieMarkObjectName = "PlayerDieMark";
+    [Header("Boss Die Mark")]
+    [Tooltip("Name of an object under this boss whose SpriteRenderer should show during the kill screen.")]
+    [SerializeField] private string bossDieMarkObjectName = "BossDieMark";
+
+    private readonly System.Collections.Generic.List<SpriteRenderer> dieMarkRenderers = new System.Collections.Generic.List<SpriteRenderer>();
+    private readonly System.Collections.Generic.List<bool> dieMarkRendererPrevEnabled = new System.Collections.Generic.List<bool>();
+
     private const string OverrideLayer = "Default";
     private const int BgSortingOrder  = 29999;
     private const int CharSortingOrder = 30000;
@@ -27,6 +37,8 @@ public class SamuraiDeathVFX : MonoBehaviour
 
     private GameObject activeFlashBackground;
     private Coroutine  activeRoutine;
+    private bool       showPlayerDieMarkThisFlash;
+    private bool       showBossDieMarkThisFlash;
 
     // -------------------------------------------------------------------------
 
@@ -37,6 +49,28 @@ public class SamuraiDeathVFX : MonoBehaviour
 
     public void TriggerDeathFlash()
     {
+        TriggerDeathFlash(false, false);
+    }
+
+    /// <summary>
+    /// Plays the kill screen flash. When <paramref name="showPlayerDieMark"/> is true,
+    /// the configured PlayerDieMark renderer is enabled for exactly the flash duration.
+    /// Use this for player-death flashes; pass false for boss-death flashes.
+    /// </summary>
+    public void TriggerDeathFlash(bool showPlayerDieMark)
+    {
+        TriggerDeathFlash(showPlayerDieMark, false);
+    }
+
+    /// <summary>
+    /// Plays the kill screen flash. Use player/boss toggles to show the corresponding die mark
+    /// for exactly the flash duration.
+    /// </summary>
+    public void TriggerDeathFlash(bool showPlayerDieMark, bool showBossDieMark)
+    {
+        showPlayerDieMarkThisFlash = showPlayerDieMark;
+        showBossDieMarkThisFlash = showBossDieMark;
+
         AutoWireTargets();
         LogTargetCounts();
 
@@ -88,15 +122,22 @@ public class SamuraiDeathVFX : MonoBehaviour
         try
         {
             SpawnBlackBackground();
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.StopAllAudioAndPlayExclusive("Whoosh");
             Time.timeScale = 0f;
             timePaused = true;
             ApplyWhiteSilhouette();
+            if (showPlayerDieMarkThisFlash)
+                EnableDieMarkRenderersForFlash();
+            if (showBossDieMarkThisFlash)
+                EnableBossDieMarkRenderersForFlash();
         }
         catch (System.Exception e)
         {
             Debug.LogError($"SamuraiDeathVFX: Exception during flash setup — {e.Message}\n{e.StackTrace}", this);
             if (timePaused) Time.timeScale = 1f;
             DestroyBlackBackground();
+            RestoreDieMarkRenderers();
             activeRoutine = null;
             yield break;
         }
@@ -104,10 +145,76 @@ public class SamuraiDeathVFX : MonoBehaviour
         yield return new WaitForSecondsRealtime(Mathf.Max(0f, flashDuration));
 
         RestoreOriginalVisuals();
+        RestoreDieMarkRenderers();
         Time.timeScale = 1f;
         DestroyBlackBackground();
 
         activeRoutine = null;
+    }
+
+    private void EnableDieMarkRenderersForFlash()
+    {
+        dieMarkRenderers.Clear();
+        dieMarkRendererPrevEnabled.Clear();
+        if (string.IsNullOrWhiteSpace(playerDieMarkObjectName)) return;
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject == null) return;
+
+        Transform[] children = playerObject.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < children.Length; i++)
+        {
+            Transform t = children[i];
+            if (t == null || t.name != playerDieMarkObjectName) continue;
+            if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+
+            SpriteRenderer[] markerRenderers = t.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int j = 0; j < markerRenderers.Length; j++)
+            {
+                SpriteRenderer sr = markerRenderers[j];
+                if (sr == null) continue;
+                dieMarkRenderers.Add(sr);
+                dieMarkRendererPrevEnabled.Add(sr.enabled);
+                sr.enabled = true;
+            }
+            return;
+        }
+    }
+
+    private void RestoreDieMarkRenderers()
+    {
+        for (int i = 0; i < dieMarkRenderers.Count; i++)
+        {
+            SpriteRenderer sr = dieMarkRenderers[i];
+            if (sr == null) continue;
+            sr.enabled = i < dieMarkRendererPrevEnabled.Count ? dieMarkRendererPrevEnabled[i] : false;
+        }
+        dieMarkRenderers.Clear();
+        dieMarkRendererPrevEnabled.Clear();
+    }
+
+    private void EnableBossDieMarkRenderersForFlash()
+    {
+        if (string.IsNullOrWhiteSpace(bossDieMarkObjectName)) return;
+
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < children.Length; i++)
+        {
+            Transform t = children[i];
+            if (t == null || t.name != bossDieMarkObjectName) continue;
+            if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+
+            SpriteRenderer[] markerRenderers = t.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int j = 0; j < markerRenderers.Length; j++)
+            {
+                SpriteRenderer sr = markerRenderers[j];
+                if (sr == null) continue;
+                dieMarkRenderers.Add(sr);
+                dieMarkRendererPrevEnabled.Add(sr.enabled);
+                sr.enabled = true;
+            }
+            return;
+        }
     }
 
     // -------------------------------------------------------------------------
