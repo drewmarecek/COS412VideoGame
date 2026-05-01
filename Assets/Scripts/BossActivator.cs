@@ -11,10 +11,11 @@ public class BossActivator : MonoBehaviour
         {
             BossController boss = FindFirstObjectByType<BossController>();
 
+            // BossController.isActive transitioning to true also drops every
+            // FallingPlatform in the arena (see BossController.OnDetectedPlayer),
+            // so this activator no longer needs to trigger them itself.
             if (boss != null)
                 boss.isActive = true;
-            
-            TriggerAllFallingPlatforms();
 
             if (triggerOnlyOnce) hasTriggered = true;
         }
@@ -23,15 +24,5 @@ public class BossActivator : MonoBehaviour
     public void ResetTrigger()
     {
         hasTriggered = false;
-    }
-
-    void TriggerAllFallingPlatforms()
-    {
-        FallingPlatform[] platforms = FindObjectsByType<FallingPlatform>(FindObjectsSortMode.None);
-        for (int i = 0; i < platforms.Length; i++)
-        {
-            if (platforms[i] != null)
-                platforms[i].TriggerFall();
-        }
     }
 }

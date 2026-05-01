@@ -70,6 +70,8 @@ public class BossController : MonoBehaviour
     private bool didDealDamageThisAttack = false;
     public bool isActive = false;
     public bool IsDefeated { get; private set; }
+    private bool wasActiveLastFrame = false;
+    private bool hasDroppedPlatforms = false;
 
     private Vector3 startPosition;
     private Vector3 startScale;
@@ -93,6 +95,12 @@ public class BossController : MonoBehaviour
 
     void Update()
     {
+        // Detect the moment the boss first becomes active and drop all
+        // falling platforms in the arena (cuts off retreat for the player).
+        if (isActive && !wasActiveLastFrame)
+            OnDetectedPlayer();
+        wasActiveLastFrame = isActive;
+
         if (!isActive || isDead || player == null) return;
 
         FacePlayer();
@@ -128,6 +136,21 @@ public class BossController : MonoBehaviour
         else if (anim != null)
         {
             anim.SetBool("isRunning", false);
+        }
+    }
+
+    // Called once the first time the boss transitions to active.
+    // Drops every FallingPlatform in the scene that hasn't already fallen.
+    void OnDetectedPlayer()
+    {
+        if (hasDroppedPlatforms) return;
+        hasDroppedPlatforms = true;
+
+        FallingPlatform[] platforms = FindObjectsByType<FallingPlatform>(FindObjectsSortMode.None);
+        for (int i = 0; i < platforms.Length; i++)
+        {
+            if (platforms[i] != null)
+                platforms[i].TriggerFall();
         }
     }
 
@@ -374,6 +397,8 @@ public class BossController : MonoBehaviour
         isDead = false;
         isAttacking = false;
         isActive = false;
+        wasActiveLastFrame = false;
+        hasDroppedPlatforms = false;
         nextAttackTime = 0f;
 
         transform.position = startPosition;

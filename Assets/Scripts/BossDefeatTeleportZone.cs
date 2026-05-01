@@ -20,6 +20,8 @@ public class BossDefeatTeleportZone : MonoBehaviour
     [Header("Placement Behavior")]
     [SerializeField] private bool followPlayerWhileLocked = true;
     [SerializeField] private bool detachFromParentOnUnlock = true;
+    [Tooltip("Offset from the player when the zone unlocks. X is always applied to the RIGHT of the player " +
+             "(this is a left-to-right platformer), regardless of which side of the boss the player was on.")]
     [SerializeField] private Vector2 spawnAheadOffset = new Vector2(2f, 0f);
 
     [Header("Optional Visuals")]
@@ -93,12 +95,10 @@ public class BossDefeatTeleportZone : MonoBehaviour
         if (detachFromParentOnUnlock)
             transform.SetParent(null, true);
 
-        float facingSign = 1f;
-        Vector3 scale = player.localScale;
-        if (Mathf.Abs(scale.x) > 0.0001f)
-            facingSign = Mathf.Sign(scale.x);
-
-        Vector3 spawnPos = player.position + new Vector3(spawnAheadOffset.x * facingSign, spawnAheadOffset.y, 0f);
+        // Always place the spawn to the RIGHT of the player. This is a left-to-right
+        // platformer, so the next-level portal must be ahead of the player no matter
+        // which side of the boss they were on at the moment of defeat.
+        Vector3 spawnPos = player.position + new Vector3(Mathf.Abs(spawnAheadOffset.x), spawnAheadOffset.y, 0f);
         transform.position = spawnPos;
         wasUnlockedLastFrame = true;
     }

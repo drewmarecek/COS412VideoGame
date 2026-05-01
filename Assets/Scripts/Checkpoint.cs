@@ -6,6 +6,11 @@ public class Checkpoint : MonoBehaviour
     public Color activeColor = Color.green;
     public bool isReached = false;
 
+    [Header("Grouping")]
+    [Tooltip("Optional. Checkpoints sharing the same non-empty groupId activate together. " +
+             "If left empty, every Checkpoint sharing the same parent transform is treated as one group.")]
+    public string groupId = "";
+
     private SpriteRenderer sr;
 
     void Start()
@@ -15,7 +20,6 @@ public class Checkpoint : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Check if the player touched the checkpoint
         if (other.CompareTag("Player") && !isReached)
         {
             ActivateCheckpoint(other.gameObject);
@@ -24,22 +28,44 @@ public class Checkpoint : MonoBehaviour
 
     void ActivateCheckpoint(GameObject player)
     {
-        isReached = true;
+        MarkReachedVisual();
 
-        // 1. Change color to show it's active
-        if (sr != null) sr.color = activeColor;
-
-        // 2. Update the Player's Spawn Point to THIS checkpoint
         PlayerHealth healthScript = player.GetComponent<PlayerHealth>();
         if (healthScript == null)
             healthScript = player.GetComponentInParent<PlayerHealth>();
         if (healthScript != null)
         {
-            // We tell the health script to use this checkpoint's position now
             healthScript.SetNewRespawnPoint(transform.position);
-            // 3. Replenish Health
             healthScript.health = healthScript.maxHealth;
             healthScript.UpdateUI();
         }
+
+        // Propagate the visual change to every other block in the same checkpoint group.
+        Checkpoint[] all = FindObjectsByType<Checkpoint>(FindObjectsSortMode.None);
+        for (int i = 0; i < all.Length; i++)
+        {
+            Checkpoint other = all[i];
+            if (other == null || other == this || other.isReached) continue;
+            if (!IsSameGroup(other)) continue;
+            other.MarkReachedVisual();
+        }
+    }
+
+    bool IsSameGroup(Checkpoint other)
+    {
+        // Explicit groupId always wins.
+        if (!string.IsNullOrEmpty(groupId) || !string.IsNullOrEmpty(other.groupId))
+            return groupId == other.groupId;
+
+        // Fallback: siblings under the same parent are treated as one checkpoint.
+        return transform.parent != null && transform.parent == other.transform.parent;
+    }
+
+    /// <summary>Flip this block to its reached state without re-binding the spawn point.</summary>
+    public void MarkReachedVisual()
+    {
+        isReached = true;
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = activeColor;
     }
 }
