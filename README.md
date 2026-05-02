@@ -1,5 +1,7 @@
 # COS 412 — 2D Action Platformer
 
+**Largely coded with AI per instructors permission**
+
 A semester project built in **Unity 6** (2D, URP): sword-and-gun combat, two main levels, bosses, traps, and light game-feel (camera shake, hit stop).
 
 ---
