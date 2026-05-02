@@ -1,69 +1,67 @@
-# COS 412 — 2D Action Platformer
+# COS 412 - 2D Action Platformer
 
-A semester project built in **Unity 6** (2D, URP): sword-and-gun combat, two main levels, bosses, traps, and light game-feel (camera shake, hit stop).
-
----
+Semester project built in **Unity 6** (2D, URP).  
+Current playable state: melee-focused platformer with two main levels, enemy encounters, hazards, checkpoints, and two boss fights.
 
 ## Requirements
 
-| | |
-|---|---|
-| **Unity** | **6000.2.x** (Unity 6) — see `ProjectSettings/ProjectVersion.txt` |
-| **Template** | 2D / URP |
+- **Unity:** `6000.2.8f1` (Unity 6) from `ProjectSettings/ProjectVersion.txt`
+- **Render pipeline:** URP (2D setup)
 
-Clone or download the repo, open the project folder in Unity Hub, then open the project.
+Open this folder in Unity Hub, then open the project.
 
----
+## Scenes and Play Flow
 
-## How to play
+Enabled build scenes (from `ProjectSettings/EditorBuildSettings.asset`):
 
-1. Open a scene under **`Assets/Scene Levels/`** (recommended):
-   - **`first_level`** — start here for the main flow.
-   - **`second_level`** — continues after the first boss; the player **starts with the gun** unlocked in this scene.
-2. Press **Play** in the Editor.
+1. `Assets/Scene Levels/first_level.unity`
+2. `Assets/Scene Levels/second_level.unity`
+3. `Assets/Scenes/SampleScene.unity`
 
-### Controls (typical setup)
+Recommended flow for grading/playtest:
 
-| Action | Input |
-|--------|--------|
-| Move | Arrow keys / WASD |
-| Aim gun | Mouse |
-| Shoot | Hold **mouse button** (fire rate capped in `GunController`) |
-| Melee | Bound in `PlayerCombat` (often mouse / attack input) |
-| Switch sword ↔ gun | **Q** (after the gun is unlocked — `WeaponManager`) |
+1. Open `Assets/Scene Levels/first_level.unity`
+2. Press **Play** in the editor
+3. Progress to level 2 through the in-game boss-defeat teleport sequence
 
-Exact bindings depend on your `Input Manager` / component setup in the scene.
+## Controls (verified in current scripts)
 
----
+- Move: `A/D` or left/right input axis
+- Jump: `Space`
+- Melee attack: left mouse button (`PlayerCombat`)
 
-## Main systems (scripts)
+Notes:
+- Facing is mouse-directed (`WeaponsManager` / `WeaponManager`).
+- Exact bindings can still vary based on Unity Input Manager setup in scene.
 
-All gameplay scripts live in **`Assets/Scripts/`**.
+## Implemented Systems
 
-| Area | Scripts (examples) |
-|------|---------------------|
-| **Player** | `GlitchPlayerController`, `PlayerHealth`, `PlayerCombat`, `WeaponManager`, `GunController`, `HeadAim` |
-| **Enemies** | `EnemyAI`, `EnemyHealth`, `EnemyAttack`, `SkeletonAI`, `FlyingDiveEnemy`, `EnemySpawner` |
-| **Bosses** | `BossController` (level 1), `boss2Script` (level 2), `BossActivator` / `Boss2Activator` |
-| **World** | `Checkpoint`, `KillZone`, `CameraFollow`, `CameraShake`, `HitStop` |
-| **Traps** | `Spike`, `FallingSpear`, `PendulumSwing`, `BossArenaCheckpointSeal` |
-| **Progression** | `TreasureChest`, `GunPickup`, `BossDefeatTeleportZone` |
+All gameplay scripts are in `Assets/Scripts/`.
 
----
+- **Player core**
+  - Movement/jump tuning with extra jumps and fall behavior (`GlitchPlayerController`)
+  - Melee combat and sword hitbox damage (`PlayerCombat`, `SwordHitbox`)
+  - Player health, i-frames, heart UI, respawn at checkpoints (`PlayerHealth`, `Checkpoint`, `KillZone`)
+- **Game feel / camera / audio**
+  - Camera follow and shake (`CameraFollow`, `CameraShake`)
+  - Hit stop on melee impact (`HitStop`)
+  - SFX manager and death effects (`AudioManager`, `SamuraiDeathVFX`)
+- **Enemies**
+  - Ground enemy AI and health (`EnemyAI`, `EnemyHealth`, `EnemyAttack`)
+  - Skeleton enemy behavior (`SkeletonAI`)
+  - Flying dive enemy with patrol/dive states (`FlyingDiveEnemy`)
+  - Spawn trigger system (`EnemySpawner`)
+- **Bosses**
+  - Boss 1 encounter and activation (`BossController`, `BossActivator`)
+  - Boss 2 encounter and activation (`boss2Script`, `Boss2Activator`)
+  - Boss-clear progression hooks (`BossDefeatTeleportZone`, `BossDefeatRaiseBlock`)
+- **Hazards / world interactions**
+  - Spikes, falling spears, pendulum trap (`Spike`, `FallingSpear`, `PendulumSwing`)
+  - Falling platform bridge behavior (`FallingPlatform`)
+  - Boss arena checkpoint seal persistence (`BossArenaCheckpointSeal`)
+  - Post-boss chest reward object (`TreasureChest`)
 
-## Project layout (short)
+## Known Scope Notes
 
-```
-Assets/
-├── Scene Levels/          # first_level, second_level (main game)
-├── Scripts/               # C# gameplay code
-├── Scenes/                # Extra / legacy scenes (e.g. Level1, SampleScene)
-├── Settings/              # URP / quality / project render settings
-└── …                      # Art, audio, third-party asset folders
-```
-
----
-
-## Roadmap ideas
-
-Ideas from earlier design notes (not all implemented): extra movement (dash, wall jump, jump pads), more enemy types, audio/music, UI for controls, polish passes.
+- Current script set is **melee-first**. A fully wired gun/ranged system is not represented in `Assets/Scripts/` as submitted.
+- `SampleScene` remains in build settings and may be a test/legacy scene depending on your local setup.
