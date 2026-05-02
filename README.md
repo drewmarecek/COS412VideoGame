@@ -2,6 +2,7 @@
 
 Semester project built in **Unity 6** (2D, URP).  
 Current playable state: melee-focused platformer with two main levels, enemy encounters, hazards, checkpoints, and two boss fights.
+**Largely coded with AI per instructors permission**
 
 ## Requirements
 
