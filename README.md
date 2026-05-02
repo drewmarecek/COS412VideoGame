@@ -68,4 +68,4 @@ Assets/
 
 ## Roadmap ideas
 
-Ideas from earlier design notes (not all implemented): extra movement (dash, wall jump, jump pads), more enemy types, audio/music, UI for controls, polish passes.
+Ideas from earlier design notes (not all implemented): extra movement (dash, wall jump, jump pads), more enemy types.
